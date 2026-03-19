@@ -6,15 +6,14 @@ on:
 name: Tests
 
 jobs:
-  test:
-    name: test
+  fast-test:
+    name: fast (${{ matrix.rust }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
         rust:
           - stable
           - nightly
-          - 1.4.0
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
@@ -22,7 +21,25 @@ jobs:
           profile: minimal
           toolchain: ${{ matrix.rust }}
           override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
+      - name: Build
+        run: make build
+      - name: Test Fast Tier
+        env:
+          FULL_APP_TAG: synthetic
+        run: make test
 
+  slow-test:
+    name: slow (stable)
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - name: Build
+        run: make build
+      - name: Test Full Suite
+        run: make test
