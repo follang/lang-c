@@ -1,8 +1,8 @@
-# Lang-C
+# PAC (parser c)
 
 [![Documentation](https://docs.rs/pac/badge.svg)](https://docs.rs/pac)
 
-Ligtweight parser of C language for Rust users. Almost full support for C11 revision of the language.
+PAC (parser c) is a lightweight parser of the C language for Rust users. Almost full support for the C11 revision of the language.
 Several GCC and Clang extensions are also supported as an option.
 
 ```rust
