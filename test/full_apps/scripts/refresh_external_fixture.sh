@@ -10,6 +10,7 @@ Usage:
 Known fixtures:
   musl-stdint
   zlib-header
+  zlib-zpipe
 EOF
 }
 
@@ -37,6 +38,18 @@ target=test/full_apps/external/zlib/header
 EOF
 }
 
+show_zlib_zpipe() {
+    cat <<'EOF'
+fixture=zlib-zpipe
+project=zlib
+version=v1.3.1
+license=public-domain
+upstream=https://github.com/madler/zlib
+files=examples/zpipe.c;zlib.h;zconf.h
+target=test/full_apps/external/zlib/zpipe_example
+EOF
+}
+
 if [ "$#" -lt 1 ]; then
     usage
     exit 1
@@ -46,6 +59,7 @@ case "$1" in
     list)
         echo musl-stdint
         echo zlib-header
+        echo zlib-zpipe
         ;;
     show)
         if [ "$#" -ne 2 ]; then
@@ -58,6 +72,9 @@ case "$1" in
                 ;;
             zlib-header)
                 show_zlib_header
+                ;;
+            zlib-zpipe)
+                show_zlib_zpipe
                 ;;
             *)
                 echo "unknown fixture: $2" >&2

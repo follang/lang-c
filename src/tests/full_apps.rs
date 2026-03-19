@@ -6,7 +6,9 @@ use crate::driver::{self, Config, Flavor};
 use crate::env::Env;
 use crate::parser;
 
-use super::support::{collect_fixture_dirs, manifest_list_values, manifest_value, read_file};
+use super::support::{
+    collect_fixture_dirs, manifest_bool, manifest_list_values, manifest_value, read_file,
+};
 
 struct FullAppCase {
     path: PathBuf,
@@ -15,6 +17,7 @@ struct FullAppCase {
     expected: AppExpected,
     entry: PathBuf,
     include_dirs: Vec<PathBuf>,
+    allow_system_includes: bool,
     tags: Vec<String>,
 }
 
@@ -48,6 +51,7 @@ impl FullAppCase {
         let mut expected = AppExpected::ParseOk;
         let mut entry = None;
         let mut include_dirs = Vec::new();
+        let mut allow_system_includes = false;
         let mut tags = Vec::new();
 
         for line in manifest.lines() {
@@ -82,6 +86,10 @@ impl FullAppCase {
                 include_dirs = values.into_iter().map(PathBuf::from).collect();
             }
 
+            if let Some(value) = manifest_bool(line, "allow_system_includes") {
+                allow_system_includes = value;
+            }
+
             if let Some(values) = manifest_list_values(line, "tags") {
                 tags = values;
             }
@@ -106,6 +114,7 @@ impl FullAppCase {
             expected: expected,
             entry: entry.unwrap_or_else(|| PathBuf::from("main.c")),
             include_dirs: include_dirs,
+            allow_system_includes: allow_system_includes,
             tags: tags,
         })
     }
@@ -125,6 +134,9 @@ impl FullAppCase {
             AppMode::Driver => {
                 let mut config = config_for(self.flavor);
                 config.flavor = flavor_for(self.flavor);
+                if !self.allow_system_includes {
+                    config.cpp_options.push("-nostdinc".to_owned());
+                }
                 for include_dir in &self.include_dirs {
                     config
                         .cpp_options
@@ -248,6 +260,7 @@ fn full_app_filter_matches_path_and_tag() {
         expected: AppExpected::ParseOk,
         entry: PathBuf::from("main.c"),
         include_dirs: Vec::new(),
+        allow_system_includes: false,
         tags: vec!["synthetic".to_owned(), "single_file".to_owned()],
     };
 
@@ -268,6 +281,7 @@ fn full_app_parse_error_expectation_is_supported() {
         expected: AppExpected::ParseError,
         entry: PathBuf::from("main.c"),
         include_dirs: Vec::new(),
+        allow_system_includes: false,
         tags: vec!["synthetic".to_owned(), "invalid".to_owned()],
     };
 
@@ -294,4 +308,15 @@ fn full_app_manifest_supports_preprocessed_mode() {
     assert!(matches!(case.mode, AppMode::Preprocessed));
     assert_eq!(case.entry, PathBuf::from("main.i"));
     assert!(case.tags.iter().any(|tag| tag == "preprocessed"));
+}
+
+#[test]
+fn full_app_manifest_supports_system_include_opt_in() {
+    let case =
+        FullAppCase::from_dir(PathBuf::from("test/full_apps/external/zlib/zpipe_example"))
+            .expect("loading external zlib example fixture");
+
+    assert!(matches!(case.mode, AppMode::Driver));
+    assert!(case.allow_system_includes);
+    assert!(case.tags.iter().any(|tag| tag == "example"));
 }

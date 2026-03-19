@@ -28,6 +28,7 @@ fn refresh_script_lists_known_fixtures() {
     let output = run_script(&["list"]);
     assert!(output.lines().any(|line| line == "musl-stdint"));
     assert!(output.lines().any(|line| line == "zlib-header"));
+    assert!(output.lines().any(|line| line == "zlib-zpipe"));
 }
 
 #[test]
@@ -46,6 +47,15 @@ fn refresh_script_shows_zlib_fixture_metadata() {
     assert!(output.contains("project=zlib"));
     assert!(output.contains("version=v1.3.1"));
     assert!(output.contains("target=test/full_apps/external/zlib/header"));
+}
+
+#[test]
+fn refresh_script_shows_zlib_example_metadata() {
+    let output = run_script(&["show", "zlib-zpipe"]);
+    assert!(output.contains("fixture=zlib-zpipe"));
+    assert!(output.contains("project=zlib"));
+    assert!(output.contains("version=v1.3.1"));
+    assert!(output.contains("target=test/full_apps/external/zlib/zpipe_example"));
 }
 
 #[test]

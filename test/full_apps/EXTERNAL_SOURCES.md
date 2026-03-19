@@ -47,6 +47,22 @@ This file records the upstream provenance for vendored external fixtures under
     exercises representative public API types without modifying the vendored
     headers.
 
+### zlib zpipe example
+
+- Project: zlib
+- Upstream: https://github.com/madler/zlib
+- Version: `v1.3.1`
+- License: Public domain
+- Source files:
+  - `examples/zpipe.c`
+  - `zlib.h`
+  - `zconf.h`
+- Local transformation:
+  - Trimmed the example down to a parser-oriented subset while preserving the
+    original declarations, includes, and API usage pattern.
+  - The local fixture reuses the vendored zlib public headers and opts into host
+    libc headers explicitly via the manifest.
+
 ### Candidate future fixtures
 
 - zlib `v1.3.1`

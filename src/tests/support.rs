@@ -65,6 +65,21 @@ pub fn manifest_list_values(line: &str, key: &str) -> Option<Vec<String>> {
     Some(values)
 }
 
+pub fn manifest_bool(line: &str, key: &str) -> Option<bool> {
+    let prefix = format!("{} = ", key);
+    let value = if line.starts_with(&prefix) {
+        line[prefix.len()..].trim()
+    } else {
+        return None;
+    };
+
+    match value {
+        "true" => Some(true),
+        "false" => Some(false),
+        _ => None,
+    }
+}
+
 pub fn read_file(path: &Path) -> io::Result<String> {
     let mut file = File::open(path)?;
     let mut content = String::new();
