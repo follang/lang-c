@@ -19,6 +19,7 @@ This file records the upstream provenance for vendored external fixtures under
 - Upstream: https://git.musl-libc.org/cgit/musl/
 - Version: `v1.2.5`
 - License: MIT
+- Local license file: `test/full_apps/licenses/musl-MIT.txt`
 - Source files:
   - `include/stdint.h`
   - `arch/x86_64/bits/stdint.h`
