@@ -2,6 +2,7 @@
 name = "lang-c"
 version = "0.15.1"
 authors = ["Vickenty Fesunov <kent@setattr.net>"]
+edition = "2021"
 license = "MIT/Apache-2.0"
 description = "Lightweight C parser"
 include = [ "/src/**/*.rs", "Cargo.toml", "/LICENSE*", "/README.md" ]

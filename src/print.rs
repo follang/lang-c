@@ -12,9 +12,9 @@
 //! ```
 use std::fmt;
 
-use ast::*;
-use span::Span;
-use visit::*;
+use crate::ast::*;
+use crate::span::Span;
+use crate::visit::*;
 
 /// Printing visitor
 ///
@@ -22,12 +22,12 @@ use visit::*;
 /// Each line contains name of the AST node type, followed by the enum variant
 /// (when it does not match name of contained node), and primitive fields.
 pub struct Printer<'a> {
-    w: &'a mut fmt::Write,
+    w: &'a mut dyn fmt::Write,
     offset: usize,
 }
 
 impl<'a> Printer<'a> {
-    pub fn new(w: &mut fmt::Write) -> Printer<'_> {
+    pub fn new(w: &mut dyn fmt::Write) -> Printer<'_> {
         Printer { w: w, offset: 0 }
     }
 
@@ -636,9 +636,9 @@ impl<'a> fmt::Display for Escape<'a> {
 
         for c in self.0.chars() {
             match c {
-                '"' | '\'' | '\\' => try!(write!(fmt, "\\{}", c)),
-                ' '...'~' => try!(fmt.write_char(c)),
-                _ => try!(write!(fmt, "\\u{{{:04x}}}", c as u32)),
+                '"' | '\'' | '\\' => r#try!(write!(fmt, "\\{}", c)),
+                ' '..='~' => r#try!(fmt.write_char(c)),
+                _ => r#try!(write!(fmt, "\\u{{{:04x}}}", c as u32)),
             }
         }
 

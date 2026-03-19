@@ -3,10 +3,10 @@
 #![allow(ellipsis_inclusive_range_patterns)]
 // Parser implementation maintained directly in Rust.
 use self::RuleResult::{Failed, Matched};
-use ast::*;
-use astutil::*;
-use env::{Env, Symbol};
-use span::{Node, Span};
+use crate::ast::*;
+use crate::astutil::*;
+use crate::env::{Env, Symbol};
+use crate::span::{Node, Span};
 fn escape_default(s: &str) -> String {
     s.chars().flat_map(|c| c.escape_default()).collect()
 }
@@ -30,16 +30,16 @@ pub struct ParseError {
 pub type ParseResult<T> = Result<T, ParseError>;
 impl ::std::fmt::Display for ParseError {
     fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
-        try!(write!(fmt, "error at {}:{}: expected ", self.line, self.column));
+        r#try!(write!(fmt, "error at {}:{}: expected ", self.line, self.column));
         if self.expected.len() == 0 {
-            try!(write!(fmt, "EOF"));
+            r#try!(write!(fmt, "EOF"));
         } else if self.expected.len() == 1 {
-            try!(write!(fmt, "`{}`", escape_default(self.expected.iter().next().unwrap())));
+            r#try!(write!(fmt, "`{}`", escape_default(self.expected.iter().next().unwrap())));
         } else {
             let mut iter = self.expected.iter();
-            try!(write!(fmt, "one of `{}`", escape_default(iter.next().unwrap())));
+            r#try!(write!(fmt, "one of `{}`", escape_default(iter.next().unwrap())));
             for elem in iter {
-                try!(write!(fmt, ", `{}`", escape_default(elem)));
+                r#try!(write!(fmt, ", `{}`", escape_default(elem)));
             }
         }
         Ok(())
@@ -242,7 +242,7 @@ fn __parse_identifier0<'input>(__input: &'input str, __state: &mut ParseState<'i
                 let __seq_res = if __input.len() > __pos {
                     let (__ch, __next) = char_range_at(__input, __pos);
                     match __ch {
-                        '_' | 'a'...'z' | 'A'...'Z' => Matched(__next, ()),
+                        '_' | 'a'..='z' | 'A'..='Z' => Matched(__next, ()),
                         _ => __state.mark_failure(__pos, "[_a-zA-Z]"),
                     }
                 } else {
@@ -256,7 +256,7 @@ fn __parse_identifier0<'input>(__input: &'input str, __state: &mut ParseState<'i
                             let __step_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -348,7 +348,7 @@ fn __parse_dec<'input>(__input: &'input str, __state: &mut ParseState<'input>, _
     if __input.len() > __pos {
         let (__ch, __next) = char_range_at(__input, __pos);
         match __ch {
-            '0'...'9' => Matched(__next, ()),
+            '0'..='9' => Matched(__next, ()),
             _ => __state.mark_failure(__pos, "[0-9]"),
         }
     } else {
@@ -361,7 +361,7 @@ fn __parse_oct<'input>(__input: &'input str, __state: &mut ParseState<'input>, _
     if __input.len() > __pos {
         let (__ch, __next) = char_range_at(__input, __pos);
         match __ch {
-            '0'...'7' => Matched(__next, ()),
+            '0'..='7' => Matched(__next, ()),
             _ => __state.mark_failure(__pos, "[0-7]"),
         }
     } else {
@@ -374,7 +374,7 @@ fn __parse_hex<'input>(__input: &'input str, __state: &mut ParseState<'input>, _
     if __input.len() > __pos {
         let (__ch, __next) = char_range_at(__input, __pos);
         match __ch {
-            '0'...'9' | 'a'...'f' | 'A'...'F' => Matched(__next, ()),
+            '0'..='9' | 'a'..='f' | 'A'..='F' => Matched(__next, ()),
             _ => __state.mark_failure(__pos, "[0-9a-fA-F]"),
         }
     } else {
@@ -387,7 +387,7 @@ fn __parse_bin<'input>(__input: &'input str, __state: &mut ParseState<'input>, _
     if __input.len() > __pos {
         let (__ch, __next) = char_range_at(__input, __pos);
         match __ch {
-            '0'...'1' => Matched(__next, ()),
+            '0'..='1' => Matched(__next, ()),
             _ => __state.mark_failure(__pos, "[0-1]"),
         }
     } else {
@@ -404,7 +404,7 @@ fn __parse_constant<'input>(__input: &'input str, __state: &mut ParseState<'inpu
                 let __assert_res = if __input.len() > __pos {
                     let (__ch, __next) = char_range_at(__input, __pos);
                     match __ch {
-                        '0'...'9' | '.' => Matched(__next, ()),
+                        '0'..='9' | '.' => Matched(__next, ()),
                         _ => __state.mark_failure(__pos, "[0-9.]"),
                     }
                 } else {
@@ -515,7 +515,7 @@ fn __parse_integer_number<'input>(__input: &'input str, __state: &mut ParseState
                     let __seq_res = if __input.len() > __pos {
                         let (__ch, __next) = char_range_at(__input, __pos);
                         match __ch {
-                            '1'...'9' => Matched(__next, ()),
+                            '1'..='9' => Matched(__next, ()),
                             _ => __state.mark_failure(__pos, "[1-9]"),
                         }
                     } else {
@@ -1950,7 +1950,7 @@ fn __parse_generic_selection<'input>(__input: &'input str, __state: &mut ParseSt
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -2157,7 +2157,7 @@ fn __parse_generic_association<'input>(__input: &'input str, __state: &mut Parse
                                     let __assert_res = if __input.len() > __pos {
                                         let (__ch, __next) = char_range_at(__input, __pos);
                                         match __ch {
-                                            '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                            '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                             _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                         }
                                     } else {
@@ -2908,7 +2908,7 @@ fn __parse_unary_expression0<'input>(__input: &'input str, __state: &mut ParseSt
                                                                                 let __assert_res = if __input.len() > __pos {
                                                                                     let (__ch, __next) = char_range_at(__input, __pos);
                                                                                     match __ch {
-                                                                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                                     }
                                                                                 } else {
@@ -3282,7 +3282,7 @@ fn __parse_sizeof_ty_expression0<'input>(__input: &'input str, __state: &mut Par
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -3391,7 +3391,7 @@ fn __parse_sizeof_val_expression0<'input>(__input: &'input str, __state: &mut Pa
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -3522,7 +3522,7 @@ fn __parse_alignof0<'input>(__input: &'input str, __state: &mut ParseState<'inpu
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -5181,7 +5181,7 @@ fn __parse_declaration0<'input>(__input: &'input str, __state: &mut ParseState<'
                                         let __assert_res = if __input.len() > __pos {
                                             let (__ch, __next) = char_range_at(__input, __pos);
                                             match __ch {
-                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                             }
                                         } else {
@@ -6362,7 +6362,7 @@ fn __parse_storage_class_specifier0<'input>(__input: &'input str, __state: &mut 
                                 let __assert_res = if __input.len() > __pos {
                                     let (__ch, __next) = char_range_at(__input, __pos);
                                     match __ch {
-                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                     }
                                 } else {
@@ -6405,7 +6405,7 @@ fn __parse_storage_class_specifier0<'input>(__input: &'input str, __state: &mut 
                                         let __assert_res = if __input.len() > __pos {
                                             let (__ch, __next) = char_range_at(__input, __pos);
                                             match __ch {
-                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                             }
                                         } else {
@@ -6448,7 +6448,7 @@ fn __parse_storage_class_specifier0<'input>(__input: &'input str, __state: &mut 
                                                 let __assert_res = if __input.len() > __pos {
                                                     let (__ch, __next) = char_range_at(__input, __pos);
                                                     match __ch {
-                                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                     }
                                                 } else {
@@ -6491,7 +6491,7 @@ fn __parse_storage_class_specifier0<'input>(__input: &'input str, __state: &mut 
                                                         let __assert_res = if __input.len() > __pos {
                                                             let (__ch, __next) = char_range_at(__input, __pos);
                                                             match __ch {
-                                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                             }
                                                         } else {
@@ -6533,7 +6533,7 @@ fn __parse_storage_class_specifier0<'input>(__input: &'input str, __state: &mut 
                                                             let __assert_res = if __input.len() > __pos {
                                                                 let (__ch, __next) = char_range_at(__input, __pos);
                                                                 match __ch {
-                                                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                 }
                                                             } else {
@@ -6608,7 +6608,7 @@ fn __parse_storage_class_typedef0<'input>(__input: &'input str, __state: &mut Pa
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -6653,7 +6653,7 @@ fn __parse_type_specifier_unique<'input>(__input: &'input str, __state: &mut Par
                                 let __assert_res = if __input.len() > __pos {
                                     let (__ch, __next) = char_range_at(__input, __pos);
                                     match __ch {
-                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                     }
                                 } else {
@@ -6696,7 +6696,7 @@ fn __parse_type_specifier_unique<'input>(__input: &'input str, __state: &mut Par
                                         let __assert_res = if __input.len() > __pos {
                                             let (__ch, __next) = char_range_at(__input, __pos);
                                             match __ch {
-                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                             }
                                         } else {
@@ -6739,7 +6739,7 @@ fn __parse_type_specifier_unique<'input>(__input: &'input str, __state: &mut Par
                                                 let __assert_res = if __input.len() > __pos {
                                                     let (__ch, __next) = char_range_at(__input, __pos);
                                                     match __ch {
-                                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                     }
                                                 } else {
@@ -6895,7 +6895,7 @@ fn __parse_type_specifier_nonunique<'input>(__input: &'input str, __state: &mut 
                                 let __assert_res = if __input.len() > __pos {
                                     let (__ch, __next) = char_range_at(__input, __pos);
                                     match __ch {
-                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                     }
                                 } else {
@@ -6938,7 +6938,7 @@ fn __parse_type_specifier_nonunique<'input>(__input: &'input str, __state: &mut 
                                         let __assert_res = if __input.len() > __pos {
                                             let (__ch, __next) = char_range_at(__input, __pos);
                                             match __ch {
-                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                             }
                                         } else {
@@ -6981,7 +6981,7 @@ fn __parse_type_specifier_nonunique<'input>(__input: &'input str, __state: &mut 
                                                 let __assert_res = if __input.len() > __pos {
                                                     let (__ch, __next) = char_range_at(__input, __pos);
                                                     match __ch {
-                                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                     }
                                                 } else {
@@ -7024,7 +7024,7 @@ fn __parse_type_specifier_nonunique<'input>(__input: &'input str, __state: &mut 
                                                         let __assert_res = if __input.len() > __pos {
                                                             let (__ch, __next) = char_range_at(__input, __pos);
                                                             match __ch {
-                                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                             }
                                                         } else {
@@ -7067,7 +7067,7 @@ fn __parse_type_specifier_nonunique<'input>(__input: &'input str, __state: &mut 
                                                                 let __assert_res = if __input.len() > __pos {
                                                                     let (__ch, __next) = char_range_at(__input, __pos);
                                                                     match __ch {
-                                                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                     }
                                                                 } else {
@@ -7110,7 +7110,7 @@ fn __parse_type_specifier_nonunique<'input>(__input: &'input str, __state: &mut 
                                                                         let __assert_res = if __input.len() > __pos {
                                                                             let (__ch, __next) = char_range_at(__input, __pos);
                                                                             match __ch {
-                                                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                             }
                                                                         } else {
@@ -7188,7 +7188,7 @@ fn __parse_type_specifier_nonunique<'input>(__input: &'input str, __state: &mut 
                                                                                 let __assert_res = if __input.len() > __pos {
                                                                                     let (__ch, __next) = char_range_at(__input, __pos);
                                                                                     match __ch {
-                                                                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                                     }
                                                                                 } else {
@@ -7231,7 +7231,7 @@ fn __parse_type_specifier_nonunique<'input>(__input: &'input str, __state: &mut 
                                                                                         let __assert_res = if __input.len() > __pos {
                                                                                             let (__ch, __next) = char_range_at(__input, __pos);
                                                                                             match __ch {
-                                                                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                                             }
                                                                                         } else {
@@ -7309,7 +7309,7 @@ fn __parse_type_specifier_nonunique<'input>(__input: &'input str, __state: &mut 
                                                                                                 let __assert_res = if __input.len() > __pos {
                                                                                                     let (__ch, __next) = char_range_at(__input, __pos);
                                                                                                     match __ch {
-                                                                                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                                                     }
                                                                                                 } else {
@@ -7352,7 +7352,7 @@ fn __parse_type_specifier_nonunique<'input>(__input: &'input str, __state: &mut 
                                                                                                         let __assert_res = if __input.len() > __pos {
                                                                                                             let (__ch, __next) = char_range_at(__input, __pos);
                                                                                                             match __ch {
-                                                                                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                                                             }
                                                                                                         } else {
@@ -7677,7 +7677,7 @@ fn __parse_struct_or_union<'input>(__input: &'input str, __state: &mut ParseStat
                                 let __assert_res = if __input.len() > __pos {
                                     let (__ch, __next) = char_range_at(__input, __pos);
                                     match __ch {
-                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                     }
                                 } else {
@@ -7719,7 +7719,7 @@ fn __parse_struct_or_union<'input>(__input: &'input str, __state: &mut ParseStat
                                     let __assert_res = if __input.len() > __pos {
                                         let (__ch, __next) = char_range_at(__input, __pos);
                                         match __ch {
-                                            '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                            '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                             _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                         }
                                     } else {
@@ -7815,7 +7815,7 @@ fn __parse_struct_declaration<'input>(__input: &'input str, __state: &mut ParseS
                                                         let __assert_res = if __input.len() > __pos {
                                                             let (__ch, __next) = char_range_at(__input, __pos);
                                                             match __ch {
-                                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                             }
                                                         } else {
@@ -8589,7 +8589,7 @@ fn __parse_enum_specifier<'input>(__input: &'input str, __state: &mut ParseState
                                 let __assert_res = if __input.len() > __pos {
                                     let (__ch, __next) = char_range_at(__input, __pos);
                                     match __ch {
-                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                     }
                                 } else {
@@ -8763,7 +8763,7 @@ fn __parse_enum_specifier<'input>(__input: &'input str, __state: &mut ParseState
                                     let __assert_res = if __input.len() > __pos {
                                         let (__ch, __next) = char_range_at(__input, __pos);
                                         match __ch {
-                                            '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                            '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                             _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                         }
                                     } else {
@@ -8958,7 +8958,7 @@ fn __parse_type_qualifier0<'input>(__input: &'input str, __state: &mut ParseStat
                                 let __assert_res = if __input.len() > __pos {
                                     let (__ch, __next) = char_range_at(__input, __pos);
                                     match __ch {
-                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                     }
                                 } else {
@@ -9036,7 +9036,7 @@ fn __parse_type_qualifier0<'input>(__input: &'input str, __state: &mut ParseStat
                                         let __assert_res = if __input.len() > __pos {
                                             let (__ch, __next) = char_range_at(__input, __pos);
                                             match __ch {
-                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                             }
                                         } else {
@@ -9114,7 +9114,7 @@ fn __parse_type_qualifier0<'input>(__input: &'input str, __state: &mut ParseStat
                                                 let __assert_res = if __input.len() > __pos {
                                                     let (__ch, __next) = char_range_at(__input, __pos);
                                                     match __ch {
-                                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                     }
                                                 } else {
@@ -9169,7 +9169,7 @@ fn __parse_type_qualifier0<'input>(__input: &'input str, __state: &mut ParseStat
                                                                     let __assert_res = if __input.len() > __pos {
                                                                         let (__ch, __next) = char_range_at(__input, __pos);
                                                                         match __ch {
-                                                                            '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                            '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                             _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                         }
                                                                     } else {
@@ -9232,7 +9232,7 @@ fn __parse_type_qualifier0<'input>(__input: &'input str, __state: &mut ParseStat
                                                                             let __assert_res = if __input.len() > __pos {
                                                                                 let (__ch, __next) = char_range_at(__input, __pos);
                                                                                 match __ch {
-                                                                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                                 }
                                                                             } else {
@@ -9295,7 +9295,7 @@ fn __parse_type_qualifier0<'input>(__input: &'input str, __state: &mut ParseStat
                                                                                     let __assert_res = if __input.len() > __pos {
                                                                                         let (__ch, __next) = char_range_at(__input, __pos);
                                                                                         match __ch {
-                                                                                            '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                                            '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                                             _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                                         }
                                                                                     } else {
@@ -9345,7 +9345,7 @@ fn __parse_type_qualifier0<'input>(__input: &'input str, __state: &mut ParseStat
                                                                             let __assert_res = if __input.len() > __pos {
                                                                                 let (__ch, __next) = char_range_at(__input, __pos);
                                                                                 match __ch {
-                                                                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                                 }
                                                                             } else {
@@ -9480,7 +9480,7 @@ fn __parse_function_specifier0<'input>(__input: &'input str, __state: &mut Parse
                                 let __assert_res = if __input.len() > __pos {
                                     let (__ch, __next) = char_range_at(__input, __pos);
                                     match __ch {
-                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                     }
                                 } else {
@@ -9522,7 +9522,7 @@ fn __parse_function_specifier0<'input>(__input: &'input str, __state: &mut Parse
                                     let __assert_res = if __input.len() > __pos {
                                         let (__ch, __next) = char_range_at(__input, __pos);
                                         match __ch {
-                                            '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                            '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                             _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                         }
                                     } else {
@@ -9592,7 +9592,7 @@ fn __parse_alignment_specifier0<'input>(__input: &'input str, __state: &mut Pars
                                 let __assert_res = if __input.len() > __pos {
                                     let (__ch, __next) = char_range_at(__input, __pos);
                                     match __ch {
-                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                     }
                                 } else {
@@ -9670,7 +9670,7 @@ fn __parse_alignment_specifier0<'input>(__input: &'input str, __state: &mut Pars
                                     let __assert_res = if __input.len() > __pos {
                                         let (__ch, __next) = char_range_at(__input, __pos);
                                         match __ch {
-                                            '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                            '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                             _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                         }
                                     } else {
@@ -10316,7 +10316,7 @@ fn __parse_array_declarator<'input>(__input: &'input str, __state: &mut ParseSta
                                                 let __assert_res = if __input.len() > __pos {
                                                     let (__ch, __next) = char_range_at(__input, __pos);
                                                     match __ch {
-                                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                     }
                                                 } else {
@@ -10469,7 +10469,7 @@ fn __parse_array_declarator<'input>(__input: &'input str, __state: &mut ParseSta
                                                                         let __assert_res = if __input.len() > __pos {
                                                                             let (__ch, __next) = char_range_at(__input, __pos);
                                                                             match __ch {
-                                                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                             }
                                                                         } else {
@@ -11621,7 +11621,7 @@ fn __parse_abstract_array_declarator<'input>(__input: &'input str, __state: &mut
                                                 let __assert_res = if __input.len() > __pos {
                                                     let (__ch, __next) = char_range_at(__input, __pos);
                                                     match __ch {
-                                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                     }
                                                 } else {
@@ -11774,7 +11774,7 @@ fn __parse_abstract_array_declarator<'input>(__input: &'input str, __state: &mut
                                                                         let __assert_res = if __input.len() > __pos {
                                                                             let (__ch, __next) = char_range_at(__input, __pos);
                                                                             match __ch {
-                                                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                             }
                                                                         } else {
@@ -12615,7 +12615,7 @@ fn __parse_static_assert0<'input>(__input: &'input str, __state: &mut ParseState
                                         let __assert_res = if __input.len() > __pos {
                                             let (__ch, __next) = char_range_at(__input, __pos);
                                             match __ch {
-                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                             }
                                         } else {
@@ -12665,7 +12665,7 @@ fn __parse_static_assert0<'input>(__input: &'input str, __state: &mut ParseState
                                             let __assert_res = if __input.len() > __pos {
                                                 let (__ch, __next) = char_range_at(__input, __pos);
                                                 match __ch {
-                                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                 }
                                             } else {
@@ -13049,7 +13049,7 @@ fn __parse_label<'input>(__input: &'input str, __state: &mut ParseState<'input>,
                                         let __assert_res = if __input.len() > __pos {
                                             let (__ch, __next) = char_range_at(__input, __pos);
                                             match __ch {
-                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                             }
                                         } else {
@@ -13146,7 +13146,7 @@ fn __parse_label<'input>(__input: &'input str, __state: &mut ParseState<'input>,
                                             let __assert_res = if __input.len() > __pos {
                                                 let (__ch, __next) = char_range_at(__input, __pos);
                                                 match __ch {
-                                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                 }
                                             } else {
@@ -13417,7 +13417,7 @@ fn __parse_if_statement<'input>(__input: &'input str, __state: &mut ParseState<'
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -13524,7 +13524,7 @@ fn __parse_else_statement<'input>(__input: &'input str, __state: &mut ParseState
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -13580,7 +13580,7 @@ fn __parse_switch_statement<'input>(__input: &'input str, __state: &mut ParseSta
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -13761,7 +13761,7 @@ fn __parse_while_statement<'input>(__input: &'input str, __state: &mut ParseStat
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -13853,7 +13853,7 @@ fn __parse_do_while_statement<'input>(__input: &'input str, __state: &mut ParseS
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -13898,7 +13898,7 @@ fn __parse_do_while_statement<'input>(__input: &'input str, __state: &mut ParseS
                                                             let __assert_res = if __input.len() > __pos {
                                                                 let (__ch, __next) = char_range_at(__input, __pos);
                                                                 match __ch {
-                                                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                 }
                                                             } else {
@@ -14002,7 +14002,7 @@ fn __parse_for_statement<'input>(__input: &'input str, __state: &mut ParseState<
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -14214,7 +14214,7 @@ fn __parse_jump_statement<'input>(__input: &'input str, __state: &mut ParseState
                                 let __assert_res = if __input.len() > __pos {
                                     let (__ch, __next) = char_range_at(__input, __pos);
                                     match __ch {
-                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                     }
                                 } else {
@@ -14281,7 +14281,7 @@ fn __parse_jump_statement<'input>(__input: &'input str, __state: &mut ParseState
                                         let __assert_res = if __input.len() > __pos {
                                             let (__ch, __next) = char_range_at(__input, __pos);
                                             match __ch {
-                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                             }
                                         } else {
@@ -14336,7 +14336,7 @@ fn __parse_jump_statement<'input>(__input: &'input str, __state: &mut ParseState
                                                 let __assert_res = if __input.len() > __pos {
                                                     let (__ch, __next) = char_range_at(__input, __pos);
                                                     match __ch {
-                                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                     }
                                                 } else {
@@ -14390,7 +14390,7 @@ fn __parse_jump_statement<'input>(__input: &'input str, __state: &mut ParseState
                                                     let __assert_res = if __input.len() > __pos {
                                                         let (__ch, __next) = char_range_at(__input, __pos);
                                                         match __ch {
-                                                            '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                            '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                             _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                         }
                                                     } else {
@@ -14705,7 +14705,7 @@ fn __parse_function_definition<'input>(__input: &'input str, __state: &mut Parse
                                         let __assert_res = if __input.len() > __pos {
                                             let (__ch, __next) = char_range_at(__input, __pos);
                                             match __ch {
-                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                             }
                                         } else {
@@ -14927,7 +14927,7 @@ fn __parse_attribute_specifier<'input>(__input: &'input str, __state: &mut Parse
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -15160,7 +15160,7 @@ fn __parse_attribute_name<'input>(__input: &'input str, __state: &mut ParseState
                     let __seq_res = if __input.len() > __pos {
                         let (__ch, __next) = char_range_at(__input, __pos);
                         match __ch {
-                            '_' | 'a'...'z' | 'A'...'Z' => Matched(__next, ()),
+                            '_' | 'a'..='z' | 'A'..='Z' => Matched(__next, ()),
                             _ => __state.mark_failure(__pos, "[_a-zA-Z]"),
                         }
                     } else {
@@ -15174,7 +15174,7 @@ fn __parse_attribute_name<'input>(__input: &'input str, __state: &mut ParseState
                                 let __step_res = if __input.len() > __pos {
                                     let (__ch, __next) = char_range_at(__input, __pos);
                                     match __ch {
-                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                     }
                                 } else {
@@ -15319,7 +15319,7 @@ fn __parse_attr_availability<'input>(__input: &'input str, __state: &mut ParseSt
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -15490,7 +15490,7 @@ fn __parse_attr_availability_clause<'input>(__input: &'input str, __state: &mut 
                                 let __assert_res = if __input.len() > __pos {
                                     let (__ch, __next) = char_range_at(__input, __pos);
                                     match __ch {
-                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                     }
                                 } else {
@@ -15575,7 +15575,7 @@ fn __parse_attr_availability_clause<'input>(__input: &'input str, __state: &mut 
                                         let __assert_res = if __input.len() > __pos {
                                             let (__ch, __next) = char_range_at(__input, __pos);
                                             match __ch {
-                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                             }
                                         } else {
@@ -15660,7 +15660,7 @@ fn __parse_attr_availability_clause<'input>(__input: &'input str, __state: &mut 
                                                 let __assert_res = if __input.len() > __pos {
                                                     let (__ch, __next) = char_range_at(__input, __pos);
                                                     match __ch {
-                                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                     }
                                                 } else {
@@ -15745,7 +15745,7 @@ fn __parse_attr_availability_clause<'input>(__input: &'input str, __state: &mut 
                                                         let __assert_res = if __input.len() > __pos {
                                                             let (__ch, __next) = char_range_at(__input, __pos);
                                                             match __ch {
-                                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                             }
                                                         } else {
@@ -15788,7 +15788,7 @@ fn __parse_attr_availability_clause<'input>(__input: &'input str, __state: &mut 
                                                                 let __assert_res = if __input.len() > __pos {
                                                                     let (__ch, __next) = char_range_at(__input, __pos);
                                                                     match __ch {
-                                                                        '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                        '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                         _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                     }
                                                                 } else {
@@ -15854,7 +15854,7 @@ fn __parse_attr_availability_clause<'input>(__input: &'input str, __state: &mut 
                                                                     let __assert_res = if __input.len() > __pos {
                                                                         let (__ch, __next) = char_range_at(__input, __pos);
                                                                         match __ch {
-                                                                            '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                                            '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                                             _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                                                         }
                                                                     } else {
@@ -16127,7 +16127,7 @@ fn __parse_asm_label_keyword<'input>(__input: &'input str, __state: &mut ParseSt
                                     let __assert_res = if __input.len() > __pos {
                                         let (__ch, __next) = char_range_at(__input, __pos);
                                         match __ch {
-                                            '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                            '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                             _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                         }
                                     } else {
@@ -16172,7 +16172,7 @@ fn __parse_asm_label_keyword<'input>(__input: &'input str, __state: &mut ParseSt
                                         let __assert_res = if __input.len() > __pos {
                                             let (__ch, __next) = char_range_at(__input, __pos);
                                             match __ch {
-                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                             }
                                         } else {
@@ -16268,7 +16268,7 @@ fn __parse_asm_statement0<'input>(__input: &'input str, __state: &mut ParseState
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -16849,7 +16849,7 @@ fn __parse_va_arg_expression_inner<'input>(__input: &'input str, __state: &mut P
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -16991,7 +16991,7 @@ fn __parse_keyword_expression0<'input>(__input: &'input str, __state: &mut Parse
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -17028,7 +17028,7 @@ fn __parse_keyword_expression0<'input>(__input: &'input str, __state: &mut Parse
                                     let __assert_res = if __input.len() > __pos {
                                         let (__ch, __next) = char_range_at(__input, __pos);
                                         match __ch {
-                                            '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                            '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                             _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                         }
                                     } else {
@@ -17064,7 +17064,7 @@ fn __parse_keyword_expression0<'input>(__input: &'input str, __state: &mut Parse
                                         let __assert_res = if __input.len() > __pos {
                                             let (__ch, __next) = char_range_at(__input, __pos);
                                             match __ch {
-                                                '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                                '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                                 _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                             }
                                         } else {
@@ -17136,7 +17136,7 @@ fn __parse_offsetof_expression_inner<'input>(__input: &'input str, __state: &mut
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
@@ -17447,7 +17447,7 @@ fn __parse_typeof_specifier<'input>(__input: &'input str, __state: &mut ParseSta
                             let __assert_res = if __input.len() > __pos {
                                 let (__ch, __next) = char_range_at(__input, __pos);
                                 match __ch {
-                                    '_' | 'a'...'z' | 'A'...'Z' | '0'...'9' => Matched(__next, ()),
+                                    '_' | 'a'..='z' | 'A'..='Z' | '0'..='9' => Matched(__next, ()),
                                     _ => __state.mark_failure(__pos, "[_a-zA-Z0-9]"),
                                 }
                             } else {
