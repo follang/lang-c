@@ -9,7 +9,27 @@ Current scope:
 
 - synthetic single-file apps
 - synthetic multi-file apps
-- curated external fixtures added later with pinned upstream metadata
+- synthetic preprocessed snapshots
+- curated external fixtures with pinned upstream metadata
 
-The first fixture here is intentionally small. It establishes the test layout and runner
-before the corpus grows into dozens of cases.
+Fixture modes:
+
+- `translation_unit`: parse the entry file directly
+- `driver`: run preprocessing with local include directories and then parse
+- `preprocessed`: parse a pinned `.i` snapshot deterministically
+
+Common manifest fields:
+
+- `name`
+- `mode`
+- `flavor`
+- `entry`
+- `expected`
+- `include_dirs`
+- `tags`
+- `source`
+- `upstream_ref`
+- `license`
+- `notes`
+
+External fixture provenance is tracked in `test/full_apps/EXTERNAL_SOURCES.md`.
