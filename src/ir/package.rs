@@ -173,6 +173,35 @@ impl SourcePackage {
     pub fn unsupported_count(&self) -> usize {
         self.unsupported_items().count()
     }
+
+    /// Retain only items that satisfy the given predicate.
+    pub fn retain_items<F>(&mut self, pred: F)
+    where
+        F: Fn(&SourceItem) -> bool,
+    {
+        self.items.retain(&pred);
+    }
+
+    /// Merge another package's items, macros, diagnostics, and provenance into this one.
+    ///
+    /// Useful when scanning multiple headers into a single combined package.
+    pub fn merge(&mut self, other: SourcePackage) {
+        self.items.extend(other.items);
+        self.macros.extend(other.macros);
+        self.diagnostics.extend(other.diagnostics);
+        self.provenance.extend(other.provenance);
+        self.macro_provenance.extend(other.macro_provenance);
+    }
+
+    /// Return a summary of diagnostic counts by kind.
+    pub fn diagnostics_count_by_kind(&self) -> std::collections::HashMap<String, usize> {
+        let mut counts = std::collections::HashMap::new();
+        for d in &self.diagnostics {
+            let key = format!("{:?}", d.kind);
+            *counts.entry(key).or_insert(0) += 1;
+        }
+        counts
+    }
 }
 
 impl Default for SourcePackage {
@@ -338,5 +367,91 @@ mod tests {
     fn default_trait() {
         let pkg = SourcePackage::default();
         assert!(pkg.is_empty());
+    }
+
+    #[test]
+    fn retain_items_filters() {
+        let mut pkg = SourcePackage::new();
+        pkg.items.push(SourceItem::Function(SourceFunction {
+            name: "foo".into(),
+            calling_convention: CallingConvention::C,
+            parameters: vec![],
+            return_type: SourceType::Void,
+            variadic: false,
+            source_offset: None,
+        }));
+        pkg.items.push(SourceItem::Variable(SourceVariable {
+            name: "bar".into(),
+            ty: SourceType::Int,
+            source_offset: None,
+        }));
+        pkg.items.push(SourceItem::Function(SourceFunction {
+            name: "baz".into(),
+            calling_convention: CallingConvention::C,
+            parameters: vec![],
+            return_type: SourceType::Int,
+            variadic: false,
+            source_offset: None,
+        }));
+
+        pkg.retain_items(|item| matches!(item, SourceItem::Function(_)));
+        assert_eq!(pkg.item_count(), 2);
+        assert_eq!(pkg.function_count(), 2);
+        assert_eq!(pkg.variable_count(), 0);
+    }
+
+    #[test]
+    fn merge_packages() {
+        let mut pkg1 = SourcePackage::new();
+        pkg1.items.push(SourceItem::Function(SourceFunction {
+            name: "a".into(),
+            calling_convention: CallingConvention::C,
+            parameters: vec![],
+            return_type: SourceType::Void,
+            variadic: false,
+            source_offset: None,
+        }));
+
+        let mut pkg2 = SourcePackage::new();
+        pkg2.items.push(SourceItem::Function(SourceFunction {
+            name: "b".into(),
+            calling_convention: CallingConvention::C,
+            parameters: vec![],
+            return_type: SourceType::Int,
+            variadic: false,
+            source_offset: None,
+        }));
+        pkg2.macros.push(SourceMacro {
+            name: "M".into(),
+            body: "1".into(),
+            form: MacroForm::ObjectLike,
+            kind: MacroKind::Integer,
+            value: Some(MacroValue::Integer(1)),
+        });
+
+        pkg1.merge(pkg2);
+        assert_eq!(pkg1.function_count(), 2);
+        assert_eq!(pkg1.macros.len(), 1);
+    }
+
+    #[test]
+    fn diagnostics_count_by_kind() {
+        let mut pkg = SourcePackage::new();
+        pkg.diagnostics.push(SourceDiagnostic::warning(
+            DiagnosticKind::DeclarationPartial,
+            "partial 1",
+        ));
+        pkg.diagnostics.push(SourceDiagnostic::warning(
+            DiagnosticKind::DeclarationPartial,
+            "partial 2",
+        ));
+        pkg.diagnostics.push(SourceDiagnostic::error(
+            DiagnosticKind::ParseFailed,
+            "parse failed",
+        ));
+
+        let counts = pkg.diagnostics_count_by_kind();
+        assert_eq!(counts["DeclarationPartial"], 2);
+        assert_eq!(counts["ParseFailed"], 1);
     }
 }
