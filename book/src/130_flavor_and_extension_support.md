@@ -70,6 +70,8 @@ in preprocessed output by default:
 | `constexpr` | (none) | storage class specifier |
 | `typeof` | `__typeof__` | type specifier (was GNU-only) |
 | `_BitInt(N)` | (none) | type specifier with width |
+| `noreturn` | `_Noreturn` | function specifier |
+| `complex` | `_Complex` | type specifier |
 
 ## GCC extension types
 
