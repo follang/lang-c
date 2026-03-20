@@ -6,5 +6,6 @@ mod hostile_headers;
 mod parse_api;
 mod recovery;
 mod reftests;
+mod scan_multifile;
 mod support;
 mod system_headers;
