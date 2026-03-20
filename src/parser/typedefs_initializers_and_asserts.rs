@@ -715,7 +715,13 @@ fn __parse_static_assert0<'input>(__input: &'input str, __state: &mut ParseState
                         let __seq_res = {
                             __state.suppress_fail += 1;
                             let res = {
-                                let __seq_res = slice_eq(__input, __state, __pos, "_Static_assert");
+                                let __seq_res = {
+                                    let __choice_res = slice_eq(__input, __state, __pos, "_Static_assert");
+                                    match __choice_res {
+                                        Matched(__pos, __value) => Matched(__pos, __value),
+                                        Failed => slice_eq(__input, __state, __pos, "static_assert"),
+                                    }
+                                };
                                 match __seq_res {
                                     Matched(__pos, e) => {
                                         let __seq_res = {
