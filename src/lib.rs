@@ -28,6 +28,7 @@
 pub mod ast;
 pub mod driver;
 pub mod extract;
+pub mod intake;
 pub mod ir;
 pub mod loc;
 pub mod parse;
