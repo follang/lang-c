@@ -61,6 +61,7 @@ pub enum TypeSpecifier {
     TypedefName(Node<Identifier>),
     TypeOf(Node<TypeOf>),
     TS18661Float(TS18661FloatType),
+    Int128,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]

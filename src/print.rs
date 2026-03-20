@@ -624,6 +624,7 @@ fn print_type_specifier<'ast>(p: &mut Printer, n: &'ast TypeSpecifier) {
         TypeSpecifier::Complex => p.w.write_str(" Complex").unwrap(),
         TypeSpecifier::Atomic(_) => p.w.write_str(" Atomic").unwrap(),
         TypeSpecifier::TypedefName(_) => p.w.write_str(" TypedefName").unwrap(),
+        TypeSpecifier::Int128 => p.w.write_str(" Int128").unwrap(),
         _ => {}
     }
 }

@@ -91,6 +91,7 @@ pub const RESERVED_GNU: &'static [&'static str] = &[
     "__typeof",
     "__volatile",
     "__volatile__",
+    "__int128",
 ];
 
 // Ref: https://clang.llvm.org/docs/AttributeReference.html
