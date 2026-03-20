@@ -14,7 +14,9 @@
 pub mod diagnostics;
 pub mod items;
 pub mod macros;
+pub mod package;
 pub mod provenance;
+pub mod target;
 pub mod types;
 
 pub use diagnostics::{DiagnosticKind, Severity, SourceDiagnostic, SourceLocation};
@@ -24,5 +26,7 @@ pub use items::{
     SourceVariable,
 };
 pub use macros::{MacroForm, MacroKind, MacroValue, SourceMacro};
+pub use package::SourcePackage;
 pub use provenance::{DeclarationProvenance, MacroProvenance, SourceOrigin};
+pub use target::{SourceDefine, SourceInputs, SourceTarget};
 pub use types::{SourceType, TypeQualifiers};

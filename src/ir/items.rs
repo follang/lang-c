@@ -16,7 +16,7 @@ pub enum SourceItem {
 }
 
 /// Discriminant tag for item classification without payload.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SourceItemKind {
     Function,
     Record,
