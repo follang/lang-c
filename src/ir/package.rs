@@ -133,12 +133,45 @@ impl SourcePackage {
         self.variables().find(|v| v.name == name)
     }
 
+    pub fn find_unsupported(&self, name: &str) -> Option<&SourceUnsupported> {
+        self.unsupported_items()
+            .find(|u| u.name.as_deref() == Some(name))
+    }
+
+    pub fn find_macro(&self, name: &str) -> Option<&SourceMacro> {
+        self.macros.iter().find(|m| m.name == name)
+    }
+
     pub fn count_by_kind(&self) -> std::collections::HashMap<SourceItemKind, usize> {
         let mut counts = std::collections::HashMap::new();
         for item in &self.items {
             *counts.entry(item.kind()).or_insert(0) += 1;
         }
         counts
+    }
+
+    pub fn function_count(&self) -> usize {
+        self.functions().count()
+    }
+
+    pub fn record_count(&self) -> usize {
+        self.records().count()
+    }
+
+    pub fn enum_count(&self) -> usize {
+        self.enums().count()
+    }
+
+    pub fn type_alias_count(&self) -> usize {
+        self.type_aliases().count()
+    }
+
+    pub fn variable_count(&self) -> usize {
+        self.variables().count()
+    }
+
+    pub fn unsupported_count(&self) -> usize {
+        self.unsupported_items().count()
     }
 }
 
