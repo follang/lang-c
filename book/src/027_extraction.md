@@ -61,6 +61,15 @@ let pkg = pac::extract::parse_and_extract_resilient(
 );
 ```
 
+### `extract_file`
+
+Read a file from disk and extract:
+
+```rust
+let pkg = pac::extract::extract_file("path/to/header.h", pac::driver::Flavor::GnuC11).unwrap();
+assert!(pkg.source_path.is_some());
+```
+
 ## What Gets Extracted
 
 | C Declaration | Source Item |
