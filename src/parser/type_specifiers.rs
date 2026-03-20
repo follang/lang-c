@@ -773,7 +773,13 @@ fn __parse_type_specifier_nonunique<'input>(__input: &'input str, __state: &mut 
                                                                                 __state.suppress_fail += 1;
                                                                                 let res = {
                                                                                     let __seq_res = {
-                                                                                        let __choice_res = slice_eq(__input, __state, __pos, "_Complex");
+                                                                                        let __choice_res = {
+                                                                                            let __choice_res = slice_eq(__input, __state, __pos, "_Complex");
+                                                                                            match __choice_res {
+                                                                                                Matched(__pos, __value) => Matched(__pos, __value),
+                                                                                                Failed => slice_eq(__input, __state, __pos, "complex"),
+                                                                                            }
+                                                                                        };
                                                                                         match __choice_res {
                                                                                             Matched(__pos, __value) => Matched(__pos, __value),
                                                                                             Failed => {

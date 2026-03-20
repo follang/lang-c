@@ -67,6 +67,7 @@ pub const RESERVED_C11: &'static [&'static str] = &[
     "nullptr",
     "constexpr",
     "noreturn",
+    "complex",
     "_BitInt",
 ];
 
