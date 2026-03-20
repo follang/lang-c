@@ -22,8 +22,12 @@ impl<'a> Lexer<'a> {
     }
 
     /// Tokenize the entire input into a `Vec<Token>`.
+    ///
+    /// Line continuations (`\` followed by newline) are spliced out before
+    /// tokenization, matching C translation phase 2.
     pub fn tokenize(input: &str) -> Vec<Token> {
-        let mut lexer = Lexer::new(input);
+        let spliced = splice_lines(input);
+        let mut lexer = Lexer::new(&spliced);
         let mut tokens = Vec::new();
         loop {
             let tok = lexer.next_token();
@@ -319,6 +323,29 @@ impl<'a> Lexer<'a> {
     }
 }
 
+/// Splice physical source lines by removing `\` + newline sequences.
+/// This implements C translation phase 2.
+fn splice_lines(input: &str) -> String {
+    let mut result = String::with_capacity(input.len());
+    let bytes = input.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'\\' && i + 1 < bytes.len() && bytes[i + 1] == b'\n' {
+            i += 2; // skip backslash + newline
+        } else if bytes[i] == b'\\'
+            && i + 2 < bytes.len()
+            && bytes[i + 1] == b'\r'
+            && bytes[i + 2] == b'\n'
+        {
+            i += 3; // skip backslash + \r\n
+        } else {
+            result.push(bytes[i] as char);
+            i += 1;
+        }
+    }
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -391,5 +418,37 @@ mod tests {
         let tokens = Lexer::tokenize("\"a\\\"b\"\n");
         assert_eq!(tokens[0].kind, TokenKind::StringLiteral);
         assert_eq!(tokens[0].text, "\"a\\\"b\"");
+    }
+
+    #[test]
+    fn lex_line_continuation() {
+        // A macro definition split across two lines
+        let tokens = Lexer::tokenize("#define FOO \\\n42\n");
+        let kinds: Vec<_> = tokens.iter().map(|t| &t.kind).collect();
+        assert_eq!(
+            kinds,
+            vec![
+                &TokenKind::Hash,
+                &TokenKind::Ident,      // define
+                &TokenKind::Whitespace,
+                &TokenKind::Ident,      // FOO
+                &TokenKind::Whitespace,
+                &TokenKind::Number,     // 42
+                &TokenKind::Newline,
+                &TokenKind::Eof,
+            ]
+        );
+        assert_eq!(tokens[5].text, "42");
+    }
+
+    #[test]
+    fn lex_multichar_operators() {
+        let tokens = Lexer::tokenize("== != <= >= << >> && || ++ -- ->\n");
+        let ops: Vec<_> = tokens
+            .iter()
+            .filter(|t| t.kind == TokenKind::Punct)
+            .map(|t| t.text.as_str())
+            .collect();
+        assert_eq!(ops, vec!["==", "!=", "<=", ">=", "<<", ">>", "&&", "||", "++", "--", "->"]);
     }
 }
