@@ -6,7 +6,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::driver::{self, Config};
 
 fn known_system_headers() -> Vec<&'static str> {
-    vec!["stdint.h", "stdio.h", "linux/stddef.h"]
+    vec!["stdint.h", "stdio.h", "linux/stddef.h", "linux/input.h"]
 }
 
 fn unique_temp_dir() -> PathBuf {
