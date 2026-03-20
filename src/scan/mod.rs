@@ -99,6 +99,22 @@ fn make_base_package(config: &ScanConfig, compiler_cmd: &str) -> SourcePackage {
     }
 }
 
+/// Collect include paths from `C_INCLUDE_PATH` and `CPATH` environment variables.
+/// These are colon-separated lists of directories, honored by gcc and clang.
+fn env_include_paths() -> Vec<std::path::PathBuf> {
+    let mut paths = Vec::new();
+    for var in &["C_INCLUDE_PATH", "CPATH"] {
+        if let Ok(val) = std::env::var(var) {
+            for entry in val.split(':') {
+                if !entry.is_empty() {
+                    paths.push(std::path::PathBuf::from(entry));
+                }
+            }
+        }
+    }
+    paths
+}
+
 fn preprocess_external(config: &ScanConfig) -> Result<(String, String), ScanError> {
     let compiler = config
         .compiler
@@ -162,6 +178,12 @@ fn preprocess_builtin(config: &ScanConfig) -> Result<(String, String), ScanError
     for dir in &config.system_include_dirs {
         resolver.add_system_path(dir);
         resolver.add_local_path(dir);
+    }
+
+    // Honor C_INCLUDE_PATH and CPATH environment variables (same as gcc/clang)
+    for dir in env_include_paths() {
+        resolver.add_system_path(&dir);
+        resolver.add_local_path(&dir);
     }
 
     // Add defines
@@ -431,5 +453,111 @@ void destroy(handle_t h);
 
         assert_eq!(config.system_include_dirs.len(), 2);
         assert!(config.resolve_typedefs);
+    }
+
+    #[test]
+    fn scan_builtin_honors_env_include_paths() {
+        // All env var tests in one function to avoid parallel race conditions
+        // on C_INCLUDE_PATH / CPATH.
+
+        let old_cinc = std::env::var("C_INCLUDE_PATH").ok();
+        let old_cpath = std::env::var("CPATH").ok();
+
+        // --- Test 1: C_INCLUDE_PATH single dir ---
+        {
+            let dir = std::env::temp_dir().join("pac_test_env_inc");
+            let inc_dir = dir.join("envheaders");
+            let _ = std::fs::create_dir_all(&inc_dir);
+
+            std::fs::write(inc_dir.join("envtype.h"), "typedef int env_int_t;\n").unwrap();
+            std::fs::write(
+                dir.join("main.h"),
+                "#include <envtype.h>\nenv_int_t get_env_val(void);\n",
+            )
+            .unwrap();
+
+            std::env::set_var("C_INCLUDE_PATH", inc_dir.display().to_string());
+            std::env::remove_var("CPATH");
+
+            let config = ScanConfig::new()
+                .entry_header(dir.join("main.h"))
+                .with_builtin_preprocessor();
+
+            let result = scan_headers(&config).expect("C_INCLUDE_PATH single dir");
+            assert!(result.package.find_type_alias("env_int_t").is_some());
+            assert!(result.package.find_function("get_env_val").is_some());
+
+            let _ = std::fs::remove_dir_all(&dir);
+        }
+
+        // --- Test 2: CPATH ---
+        {
+            let dir = std::env::temp_dir().join("pac_test_cpath");
+            let inc_dir = dir.join("cpathheaders");
+            let _ = std::fs::create_dir_all(&inc_dir);
+
+            std::fs::write(inc_dir.join("cptype.h"), "typedef long cp_long_t;\n").unwrap();
+            std::fs::write(
+                dir.join("main.h"),
+                "#include <cptype.h>\ncp_long_t get_cp_val(void);\n",
+            )
+            .unwrap();
+
+            std::env::remove_var("C_INCLUDE_PATH");
+            std::env::set_var("CPATH", inc_dir.display().to_string());
+
+            let config = ScanConfig::new()
+                .entry_header(dir.join("main.h"))
+                .with_builtin_preprocessor();
+
+            let result = scan_headers(&config).expect("CPATH single dir");
+            assert!(result.package.find_type_alias("cp_long_t").is_some());
+            assert!(result.package.find_function("get_cp_val").is_some());
+
+            let _ = std::fs::remove_dir_all(&dir);
+        }
+
+        // --- Test 3: C_INCLUDE_PATH with multiple colon-separated dirs ---
+        {
+            let dir = std::env::temp_dir().join("pac_test_env_multi");
+            let inc1 = dir.join("inc1");
+            let inc2 = dir.join("inc2");
+            let _ = std::fs::create_dir_all(&inc1);
+            let _ = std::fs::create_dir_all(&inc2);
+
+            std::fs::write(inc1.join("a.h"), "typedef int a_t;\n").unwrap();
+            std::fs::write(inc2.join("b.h"), "typedef long b_t;\n").unwrap();
+            std::fs::write(
+                dir.join("main.h"),
+                "#include <a.h>\n#include <b.h>\na_t fa(void);\nb_t fb(void);\n",
+            )
+            .unwrap();
+
+            std::env::set_var(
+                "C_INCLUDE_PATH",
+                format!("{}:{}", inc1.display(), inc2.display()),
+            );
+            std::env::remove_var("CPATH");
+
+            let config = ScanConfig::new()
+                .entry_header(dir.join("main.h"))
+                .with_builtin_preprocessor();
+
+            let result = scan_headers(&config).expect("C_INCLUDE_PATH multi dirs");
+            assert!(result.package.find_function("fa").is_some());
+            assert!(result.package.find_function("fb").is_some());
+
+            let _ = std::fs::remove_dir_all(&dir);
+        }
+
+        // Restore original env
+        match old_cinc {
+            Some(v) => std::env::set_var("C_INCLUDE_PATH", v),
+            None => std::env::remove_var("C_INCLUDE_PATH"),
+        }
+        match old_cpath {
+            Some(v) => std::env::set_var("CPATH", v),
+            None => std::env::remove_var("CPATH"),
+        }
     }
 }
