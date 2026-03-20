@@ -681,6 +681,40 @@ pub fn extract_from_translation_unit(
     }
 }
 
+/// Parse and extract in one step, with configurable flavor.
+pub fn parse_and_extract(
+    source: &str,
+    flavor: crate::driver::Flavor,
+) -> Result<SourcePackage, String> {
+    let unit = crate::parse::translation_unit(source, flavor)
+        .map_err(|e| format!("parse error at line {}:{}: {:?}", e.line, e.column, e.expected))?;
+
+    let extractor = Extractor::new();
+    let (items, diagnostics) = extractor.extract(&unit);
+
+    Ok(SourcePackage {
+        items,
+        diagnostics,
+        ..SourcePackage::new()
+    })
+}
+
+/// Parse with resilient recovery and extract, returning diagnostics for parse errors.
+pub fn parse_and_extract_resilient(
+    source: &str,
+    flavor: crate::driver::Flavor,
+) -> SourcePackage {
+    let unit = crate::parse::translation_unit_resilient(source, flavor);
+    let extractor = Extractor::new();
+    let (items, diagnostics) = extractor.extract(&unit);
+
+    SourcePackage {
+        items,
+        diagnostics,
+        ..SourcePackage::new()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1083,5 +1117,48 @@ mod tests {
         let pkg = super::extract_from_translation_unit(&unit, Some("test.h".into()));
         assert_eq!(pkg.source_path.as_deref(), Some("test.h"));
         assert_eq!(pkg.functions().count(), 1);
+    }
+
+    #[test]
+    fn parse_and_extract_works() {
+        let pkg = super::parse_and_extract(
+            "typedef int my_int;\nvoid foo(my_int x);",
+            crate::driver::Flavor::StdC11,
+        )
+        .unwrap();
+        assert_eq!(pkg.type_aliases().count(), 1);
+        assert_eq!(pkg.functions().count(), 1);
+    }
+
+    #[test]
+    fn parse_and_extract_error() {
+        let result = super::parse_and_extract("@@@invalid", crate::driver::Flavor::StdC11);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn parse_and_extract_empty() {
+        let pkg = super::parse_and_extract("", crate::driver::Flavor::StdC11).unwrap();
+        assert!(pkg.is_empty());
+    }
+
+    #[test]
+    fn parse_and_extract_resilient_recovers() {
+        let pkg = super::parse_and_extract_resilient(
+            "int before;\n@@@invalid@@@;\nint after(void);",
+            crate::driver::Flavor::StdC11,
+        );
+        // Should recover at least some items
+        assert!(pkg.item_count() >= 1);
+    }
+
+    #[test]
+    fn parse_and_extract_deterministic() {
+        let src = "struct point { int x; int y; };\nvoid foo(struct point *p);";
+        let pkg1 = super::parse_and_extract(src, crate::driver::Flavor::GnuC11).unwrap();
+        let pkg2 = super::parse_and_extract(src, crate::driver::Flavor::GnuC11).unwrap();
+        let j1 = serde_json::to_string(&pkg1).unwrap();
+        let j2 = serde_json::to_string(&pkg2).unwrap();
+        assert_eq!(j1, j2);
     }
 }
