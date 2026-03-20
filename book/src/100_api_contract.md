@@ -60,7 +60,7 @@ If you are building on top of `pac`, the safest current rules are:
 Today the strongest practical contract is:
 
 - `driver::Config`, `Flavor`, `Parse`, `Error`, and `SyntaxError`
-- `parse::{constant, expression, declaration, statement, translation_unit}`
+- `parse::{constant, expression, declaration, statement, translation_unit, translation_unit_resilient}`
 - the AST model under `ast`
 - the traversal hooks under `visit`
 - the span/location model under `span` and `loc`

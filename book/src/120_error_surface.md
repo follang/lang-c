@@ -111,6 +111,24 @@ match parse(&Config::default(), "broken.c") {
 }
 ```
 
+## Resilient parsing
+
+`parse::translation_unit_resilient` provides error recovery. When a declaration fails to parse, it
+skips to the next synchronization point (`;` at file scope or `}` at brace depth zero) and continues
+parsing.
+
+```rust
+use pac::driver::Flavor;
+use pac::parse;
+
+let tu = parse::translation_unit_resilient(source, Flavor::GnuC11);
+// tu.0 contains all successfully parsed declarations
+// unparseable regions are silently skipped
+```
+
+Use this when you want partial results from files that contain unsupported syntax. The strict
+`translation_unit` function is still preferred when you need to detect all errors.
+
 ## Failure-model guidance
 
 Downstream tools should treat parse failures as normal, reportable outcomes.
