@@ -16,7 +16,16 @@ The intended downstream pattern is:
 3. consume the `SourcePackage` IR from `ir`
 4. use `visit`, `span`, and `loc` to analyze AST-level details if needed
 
-Downstream consumers (LINC, GERC) should depend on `parc::ir`, not on `parc::ast` directly.
+Downstream consumers should depend on `parc::ir`, not on `parc::ast` directly.
+
+More importantly for this repository:
+
+- `parc` library code must not depend on `linc` or `gec`
+- `linc` and `gec` should not require `parc` as a library dependency in their
+  production code paths
+- integration should happen through PARC-owned artifacts in tests/examples or
+  external harnesses
+- there is no shared ABI crate that all three libraries depend on
 
 ## Preferred public surface
 
@@ -55,11 +64,13 @@ If you are building on top of `parc`, the safest current rules are:
 
 1. use `driver` when preprocessing matters
 2. use `parse::*` for fragment parsing or already-controlled text inputs
-3. treat `ast` types as the primary output contract
+3. treat `ir::SourcePackage` as the primary output contract
 4. use `visit` for traversal instead of hand-rolling recursive descent everywhere
 5. use `span` and `loc` for diagnostics rather than guessing source positions
 6. do not rely on exact error-message strings for durable control flow
 7. do not treat PAC as semantic analysis, type checking, or ABI proof
+8. if another crate needs PARC output, serialize the PARC-owned artifact and
+   translate it outside library code
 
 ## What is part of the practical contract
 

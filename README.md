@@ -2,8 +2,16 @@
 
 [![Documentation](https://docs.rs/parc/badge.svg)](https://docs.rs/parc)
 
-PARC is a C language frontend: preprocessing, parsing, and source-level semantic extraction.
-Full support for C11 with GNU and Clang extensions.
+PARC is a C language frontend: preprocessing, parsing, header scanning, and
+source-level semantic extraction.
+
+In the intended repository architecture, `parc` owns source meaning only.
+
+- `parc` library code does not depend on `linc` or `gec`
+- `parc` emits a PARC-owned source artifact
+- downstream crates may consume that artifact in tests, examples, or external
+  harnesses
+- there is no shared ABI crate and no library-level cross-package adapter
 
 ```rust
 use parc::driver::{Config, parse};
@@ -23,6 +31,31 @@ Just open an issue, bug reports and patches are most welcome.
 Dual-licenced under Apache 2.0 or MIT licenses (see `LICENSE-APACHE` and `LICENSE-MIT` for legal terms).
 
 ## Development
+
+## Artifact Boundary
+
+`parc` is not the owner of a universal pipeline type.
+
+It owns its own source model and its own serialized artifact story.
+That artifact should contain:
+
+- extracted declarations
+- normalized source types
+- macros that matter downstream
+- provenance
+- diagnostics
+- partial or unsupported declarations
+
+Cross-package integration belongs outside `parc` library code. If `linc` or
+`gec` wants to consume `parc` output, that translation should happen in:
+
+- `linc/tests/**`
+- `linc/examples/**`
+- `gec/tests/**`
+- `gec/examples/**`
+- external integration harnesses
+
+Never in `parc/src/**`.
 
 The parser implementation lives under `src/parser/` and is maintained directly in Rust.
 There is no external PEG generation step in the build anymore.

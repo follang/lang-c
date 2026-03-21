@@ -16,7 +16,7 @@ categories = [ "parser-implementations" ]
 serde = { version = "1", features = ["derive"] }
 
 [dev-dependencies]
-serde_json = "1"
+serde_json = "=1.0.145"
 
 [features]
 dev-pegviz = [] # tests only: emit extra output for pegviz

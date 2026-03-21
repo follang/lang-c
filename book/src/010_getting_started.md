@@ -100,3 +100,26 @@ fn main() {
 - [Common Workflows](./015_workflows.md) for choosing between `driver`, `parse_preprocessed`, and `parse`
 - [Driver API](./020_driver.md) for preprocessing and file-based parsing
 - [Parser API](./030_parser.md) for fragment parsing
+
+## Architectural boundary
+
+`parc` is the source frontend.
+
+It owns:
+
+- preprocessing
+- parsing
+- source extraction
+- source diagnostics
+- the `parc::ir::SourcePackage` artifact
+
+It does not own:
+
+- symbol inventory
+- binary validation
+- link planning
+- Rust code generation
+
+In this repository, cross-package composition should not live in `parc` library
+code. `linc` and `gec` should consume `parc` output only from tests, examples,
+or external harnesses.
