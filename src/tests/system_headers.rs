@@ -160,3 +160,35 @@ fn openssl_wrapper_extracts_public_surface_when_headers_exist() {
     fs::remove_file(&wrapper).expect("removing temporary wrapper");
     fs::remove_dir(&dir).expect("removing temporary wrapper directory");
 }
+
+#[test]
+fn openssl_wrapper_extracts_deterministically_when_headers_exist() {
+    let Some(header) = find_header(&[
+        "/usr/include/openssl/ssl.h",
+        "/usr/include/x86_64-linux-gnu/openssl/ssl.h",
+    ]) else {
+        return;
+    };
+
+    let make = || {
+        let dir = unique_temp_dir();
+        fs::create_dir_all(&dir).expect("creating temporary wrapper directory");
+        let wrapper = write_wrapper(
+            &dir,
+            Path::new(header)
+                .strip_prefix("/usr/include/")
+                .ok()
+                .and_then(|p| p.to_str())
+                .unwrap_or("openssl/ssl.h"),
+        );
+
+        let pkg = parse_wrapper_package(&wrapper).expect("openssl wrapper should parse and extract");
+        let json = serde_json::to_string(&pkg).expect("openssl package json");
+
+        fs::remove_file(&wrapper).expect("removing temporary wrapper");
+        fs::remove_dir(&dir).expect("removing temporary wrapper directory");
+        json
+    };
+
+    assert_eq!(make(), make());
+}
