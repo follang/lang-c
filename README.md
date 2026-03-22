@@ -107,6 +107,49 @@ The current suite covers:
 
 The tests are the best statement of what PARC actually supports.
 
+## Hardening Matrix
+
+The current hardening ladder is easiest to read in four buckets:
+
+- hermetic vendored baselines
+  - musl `stdint`
+  - vendored zlib
+  - vendored libpng failure surface
+- host-dependent public-header ladders
+  - OpenSSL public wrapper extraction
+  - Linux combined event-loop wrapper extraction
+- hostile and degraded surfaces
+  - hostile declaration fixtures
+  - resilient recovery fixtures
+  - conservative failure on libpng builtin-preprocessor width checks
+- determinism anchors
+  - vendored musl scan
+  - vendored libpng failure path
+  - OpenSSL wrapper extraction
+  - combined Linux event-loop wrapper extraction
+
+Read those as the current confidence anchors, not as a promise that every
+system header family is equally mature.
+
+## Release Gates
+
+`parc` should only be treated as release-ready when all of these remain green:
+
+- `make build`
+- `make test`
+- hostile/system/full-app suites
+- at least one vendored large-header scan target
+- at least one combined system-header target
+- deterministic repeated extraction on canonical large surfaces
+
+The current canonical frontend surfaces are:
+
+- vendored musl `stdint`
+- vendored zlib failure-conservative scan
+- vendored libpng failure-conservative scan
+- OpenSSL public wrapper extraction
+- combined Linux event-loop wrapper extraction
+
 ## Build And Test
 
 ```sh
