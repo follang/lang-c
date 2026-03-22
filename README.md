@@ -149,8 +149,31 @@ The current canonical frontend surfaces are:
 - vendored musl `stdint`
 - vendored zlib scan
 - vendored libpng scan
+- repo-owned `macro_env_a` hostile macro corpus
+- repo-owned `type_env_b` hostile type corpus
 - OpenSSL public wrapper extraction
 - combined Linux event-loop wrapper extraction
+
+## Canonical Corpus
+
+The current PARC production corpus is intentionally named:
+
+- hermetic vendored
+  - musl `stdint`
+  - zlib public headers
+  - libpng public headers
+- hermetic synthetic hostile
+  - `test/corpus/macro_env_a`
+  - `test/corpus/type_env_b`
+- host-dependent raises
+  - OpenSSL public wrapper extraction
+  - combined Linux event-loop wrapper extraction
+- conservative-failure anchors
+  - vendored zlib builtin-preprocessor conservative parse failure
+  - malformed-source hard errors
+  - resilient-source recovery paths
+
+Those are the surfaces PARC should be judged against first.
 
 ## Build And Test
 
