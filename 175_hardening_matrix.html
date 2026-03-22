@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-75159a9b.js";
+            window.path_to_searchindex_js = "searchindex-b1c210d5.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-6cd1cca1.js"></script>
@@ -200,6 +200,8 @@ source extraction.</p>
 <li>vendored musl <code>stdint</code></li>
 <li>vendored zlib</li>
 <li>vendored libpng builtin-preprocessor success path</li>
+<li>repo-owned <code>macro_env_a</code> hostile macro corpus</li>
+<li>repo-owned <code>type_env_b</code> hostile type corpus</li>
 <li>parser and extraction corpus fixtures under <code>src/tests/**</code></li>
 </ul>
 <p>These matter because they exercise:</p>
@@ -224,9 +226,12 @@ target than the small synthetic fixtures.</p>
 understand everything:</p>
 <ul>
 <li>hostile declaration fixtures</li>
+<li>repo-owned hostile corpora that force builtin-preprocessor macro and typedef expansion</li>
 <li>recovery fixtures</li>
 <li>unsupported or partial declaration families that still emit diagnostics and
 partial metadata</li>
+<li>extraction-status summaries that distinguish supported, partial, and
+unsupported output trust</li>
 </ul>
 <p>For release purposes, these failures are good when they are:</p>
 <ul>
@@ -240,6 +245,8 @@ partial metadata</li>
 <li>vendored musl scan</li>
 <li>vendored zlib scan</li>
 <li>vendored libpng scan</li>
+<li><code>macro_env_a</code> scan</li>
+<li><code>type_env_b</code> scan</li>
 <li>OpenSSL wrapper extraction</li>
 <li>combined Linux event-loop wrapper extraction</li>
 </ul>

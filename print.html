@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-75159a9b.js";
+            window.path_to_searchindex_js = "searchindex-b1c210d5.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-6cd1cca1.js"></script>
@@ -2412,8 +2412,51 @@ in preprocessed output by default:</p>
 flavor setting is part of the API contract for using them correctly.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="unsupported-cases"><a class="header" href="#unsupported-cases">Unsupported Cases</a></h1>
-<p>This chapter records the important unsupported or intentionally out-of-scope areas.</p>
-<p>The goal is to prevent downstream users from mistaking absence of detail for implicit support.</p>
+<p>This chapter records the important unsupported or intentionally out-of-scope
+areas.</p>
+<p>The goal is to prevent downstream users from mistaking absence of detail for
+implicit support.</p>
+<p>It also acts as the current frontend-family closure ledger. Every hard family
+should fit into one of these buckets:</p>
+<ul>
+<li>fully supported</li>
+<li>resilient-only support</li>
+<li>diagnostics-only improvement</li>
+<li>intentional rejection</li>
+</ul>
+<p>For the Level 1 production claim, this ledger is part of the real contract.
+If a family is not classified here, it should not be treated as in-scope
+production behavior.</p>
+<h2 id="frontend-family-closure-ledger"><a class="header" href="#frontend-family-closure-ledger">Frontend-Family Closure Ledger</a></h2>
+<p>The current important families are:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Family</th><th>Current state</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>K&amp;R function declarations</td><td>diagnostics-only improvement</td><td>PARC preserves the function surface and emits explicit unsupported diagnostics.</td></tr>
+<tr><td>block pointers</td><td>intentional rejection</td><td>They still fail in parsing; current work is about sharper diagnostics, not pretending they lower cleanly.</td></tr>
+<tr><td>bitfield-heavy records</td><td>resilient-only support</td><td>PARC keeps record shape and bit widths, but layout truth remains partial.</td></tr>
+<tr><td>vendor attributes and calling-convention attributes</td><td>resilient-only support</td><td>PARC preserves the declaration and emits partial diagnostics when attributes are ignored.</td></tr>
+<tr><td>macro-heavy include stacks</td><td>fully supported on current canonical corpora</td><td>The canonical corpora are the proof surface; more corpora still need to land before claiming broad closure.</td></tr>
+<tr><td>hostile include-order and typedef-chain environments</td><td>fully supported on current canonical corpora</td><td>Treat this as corpus-backed support, not universal extension parity.</td></tr>
+</tbody>
+</table>
+</div>
+<p>This ledger is intentionally blunt:</p>
+<ul>
+<li>if a family is not yet honestly representable, reject it</li>
+<li>if a family is only partially representable, say so</li>
+<li>if a family is only proven on named corpora, document that exact scope</li>
+</ul>
+<p>The Level 1 production envelope is Linux/ELF-first and corpus-backed. That
+means “supported” here should be read as one of:</p>
+<ul>
+<li>fully supported within the named canonical corpus</li>
+<li>partially supported with explicit diagnostics</li>
+<li>rejected explicitly as out of scope</li>
+</ul>
 <h2 id="semantic-analysis"><a class="header" href="#semantic-analysis">Semantic analysis</a></h2>
 <p>PARC does not provide:</p>
 <ul>
@@ -2431,10 +2474,14 @@ flavor setting is part of the API contract for using them correctly.</p>
 <li><code>gcc -E</code></li>
 <li><code>clang -E</code></li>
 </ul>
-<p>That means PARC does not try to normalize every compiler’s preprocessing behavior internally.</p>
+<p>That means PARC does not try to normalize every compiler’s preprocessing
+behavior internally.</p>
+<p>The built-in preprocessor is increasingly useful for scan-first workflows, but
+it is still a scoped compatibility surface rather than a promise of universal
+host-header parity.</p>
 <h2 id="extension-completeness"><a class="header" href="#extension-completeness">Extension completeness</a></h2>
-<p>PARC supports several GNU and Clang extensions, but the project does not promise complete parity
-with every extension accepted by modern GCC or Clang releases.</p>
+<p>PARC supports several GNU and Clang extensions, but the project does not promise
+complete parity with every extension accepted by modern GCC or Clang releases.</p>
 <p>Downstream tools should not assume:</p>
 <ul>
 <li>full GNU extension completeness</li>
@@ -2462,7 +2509,15 @@ stable semantic model of macro definitions as its own output contract.</p>
 <li>rich categorized error codes</li>
 <li>a stable diagnostic JSON schema</li>
 </ul>
-<p>The current error model is strong enough for syntax handling, not full compiler UX.</p>
+<p>The current error model is strong enough for syntax handling, not full compiler
+UX.</p>
+<p>The practical rule for the remaining hard families is:</p>
+<ul>
+<li>if PARC can keep a trustworthy declaration surface, it should do so and emit
+diagnostics</li>
+<li>if PARC cannot keep a trustworthy declaration surface, it should reject the
+construct explicitly</li>
+</ul>
 <h2 id="consumer-guidance"><a class="header" href="#consumer-guidance">Consumer guidance</a></h2>
 <p>Downstream tools should treat these gaps as explicit non-guarantees.</p>
 <p>That means:</p>
@@ -2470,6 +2525,8 @@ stable semantic model of macro definitions as its own output contract.</p>
 <li>build policy around syntax success and failure, not semantic certainty</li>
 <li>isolate extension-heavy assumptions behind tests</li>
 <li>keep representative preprocessed fixtures for any hard parser dependency</li>
+<li>treat the closure ledger above as part of the real contract, not as a vague
+future roadmap</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="reproducibility"><a class="header" href="#reproducibility">Reproducibility</a></h1>
@@ -2717,6 +2774,8 @@ source extraction.</p>
 <li>vendored musl <code>stdint</code></li>
 <li>vendored zlib</li>
 <li>vendored libpng builtin-preprocessor success path</li>
+<li>repo-owned <code>macro_env_a</code> hostile macro corpus</li>
+<li>repo-owned <code>type_env_b</code> hostile type corpus</li>
 <li>parser and extraction corpus fixtures under <code>src/tests/**</code></li>
 </ul>
 <p>These matter because they exercise:</p>
@@ -2741,9 +2800,12 @@ target than the small synthetic fixtures.</p>
 understand everything:</p>
 <ul>
 <li>hostile declaration fixtures</li>
+<li>repo-owned hostile corpora that force builtin-preprocessor macro and typedef expansion</li>
 <li>recovery fixtures</li>
 <li>unsupported or partial declaration families that still emit diagnostics and
 partial metadata</li>
+<li>extraction-status summaries that distinguish supported, partial, and
+unsupported output trust</li>
 </ul>
 <p>For release purposes, these failures are good when they are:</p>
 <ul>
@@ -2757,6 +2819,8 @@ partial metadata</li>
 <li>vendored musl scan</li>
 <li>vendored zlib scan</li>
 <li>vendored libpng scan</li>
+<li><code>macro_env_a</code> scan</li>
+<li><code>type_env_b</code> scan</li>
 <li>OpenSSL wrapper extraction</li>
 <li>combined Linux event-loop wrapper extraction</li>
 </ul>
@@ -2870,6 +2934,7 @@ work, not library coupling</li>
 <li>vendored zlib</li>
 <li>vendored libpng scan</li>
 <li>OpenSSL public wrapper extraction</li>
+<li>libcurl public wrapper extraction</li>
 <li>combined Linux event-loop wrapper extraction</li>
 </ul>
 </li>
@@ -2893,6 +2958,10 @@ claims.</p>
 <li>intentionally conservative when a large header family cannot be modeled
 honestly</li>
 </ul>
+<p>For Level 1 production, PARC should be read as Linux/ELF-first and
+canonical-corpus-backed, not as a universal frontend for arbitrary C headers.</p>
+<p>For whole-pipeline claims, this score is also capped by downstream <code>gerc</code>
+anchors that ingest translated PARC source surfaces in tests/examples.</p>
 <p>That is good progress, but it is not the same thing as “finished for every C
 header in the wild”.</p>
 <h2 id="subsystem-scorecard"><a class="header" href="#subsystem-scorecard">Subsystem Scorecard</a></h2>
@@ -2912,6 +2981,8 @@ header in the wild”.</p>
 <li>vendored musl <code>stdint</code></li>
 <li>vendored zlib</li>
 <li>vendored libpng scan</li>
+<li>repo-owned <code>macro_env_a</code></li>
+<li>repo-owned <code>type_env_b</code></li>
 <li>OpenSSL public wrapper extraction</li>
 <li>combined Linux event-loop wrapper extraction</li>
 </ul>

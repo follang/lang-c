@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-75159a9b.js";
+            window.path_to_searchindex_js = "searchindex-b1c210d5.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-6cd1cca1.js"></script>
@@ -186,6 +186,10 @@ claims.</p>
 <li>intentionally conservative when a large header family cannot be modeled
 honestly</li>
 </ul>
+<p>For Level 1 production, PARC should be read as Linux/ELF-first and
+canonical-corpus-backed, not as a universal frontend for arbitrary C headers.</p>
+<p>For whole-pipeline claims, this score is also capped by downstream <code>gerc</code>
+anchors that ingest translated PARC source surfaces in tests/examples.</p>
 <p>That is good progress, but it is not the same thing as “finished for every C
 header in the wild”.</p>
 <h2 id="subsystem-scorecard"><a class="header" href="#subsystem-scorecard">Subsystem Scorecard</a></h2>
@@ -205,6 +209,8 @@ header in the wild”.</p>
 <li>vendored musl <code>stdint</code></li>
 <li>vendored zlib</li>
 <li>vendored libpng scan</li>
+<li>repo-owned <code>macro_env_a</code></li>
+<li>repo-owned <code>type_env_b</code></li>
 <li>OpenSSL public wrapper extraction</li>
 <li>combined Linux event-loop wrapper extraction</li>
 </ul>
