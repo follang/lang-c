@@ -23,6 +23,7 @@
   - [Stable Usage Patterns](./170_stable_usage_patterns.md)
 - [Contributor Workflow](./160_contributor_workflow.md)
   - [Support Tiers](./180_support_tiers.md)
+  - [Hardening Matrix](./175_hardening_matrix.md)
   - [Parser Boundaries](./190_parser_boundaries.md)
   - [Release Checklist](./200_release_checklist.md)
 - [Migration From bic](./210_migration_from_bic.md)

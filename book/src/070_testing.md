@@ -27,6 +27,19 @@ Those run:
 - `cargo build --release`
 - `cargo test`
 
+## Hermeticity split
+
+The large PARC surfaces should be read in three groups:
+
+- always-on hermetic baselines
+- host-dependent but high-value ladders
+- hostile or conservative-failure surfaces
+
+The hermetic baselines should remain the default confidence floor. The
+host-dependent ladders should strengthen confidence when available. The failure
+surfaces should prove that PARC stays diagnostic and deterministic when it
+cannot fully model a header family yet.
+
 ## Contract tests
 
 Contract tests are the tests a downstream toolchain should treat as the main
