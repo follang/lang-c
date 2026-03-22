@@ -20,6 +20,7 @@ fn closure_ledger_block_pointer_declarations_stay_unsupported() {
     let err = parse_and_extract("void (^handler)(int);", Flavor::GnuC11)
         .expect_err("block pointer declaration should remain unsupported at parse time");
     assert!(err.contains("parse error"));
+    assert!(err.contains("block pointer declarators are currently unsupported"));
 }
 
 #[test]

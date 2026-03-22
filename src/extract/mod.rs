@@ -653,15 +653,23 @@ fn calling_convention_from_attr_name(name: &str) -> Option<CallingConvention> {
 
 // --- Public API functions ---
 
+fn format_parse_error(
+    source: &str,
+    line: usize,
+    column: usize,
+    expected: &impl std::fmt::Debug,
+) -> String {
+    let mut message = format!("parse error at line {}:{}: {:?}", line, column, expected);
+    if source.contains("(^") {
+        message.push_str("; block pointer declarators are currently unsupported");
+    }
+    message
+}
+
 /// Parse C source and extract a `SourcePackage`.
 pub fn extract_from_source(source: &str) -> Result<SourcePackage, String> {
-    let unit =
-        crate::parse::translation_unit(source, crate::driver::Flavor::GnuC11).map_err(|e| {
-            format!(
-                "parse error at line {}:{}: {:?}",
-                e.line, e.column, e.expected
-            )
-        })?;
+    let unit = crate::parse::translation_unit(source, crate::driver::Flavor::GnuC11)
+        .map_err(|e| format_parse_error(source, e.line, e.column, &e.expected))?;
 
     let extractor = Extractor::new();
     let (items, diagnostics) = extractor.extract(&unit);
@@ -694,12 +702,8 @@ pub fn parse_and_extract(
     source: &str,
     flavor: crate::driver::Flavor,
 ) -> Result<SourcePackage, String> {
-    let unit = crate::parse::translation_unit(source, flavor).map_err(|e| {
-        format!(
-            "parse error at line {}:{}: {:?}",
-            e.line, e.column, e.expected
-        )
-    })?;
+    let unit = crate::parse::translation_unit(source, flavor)
+        .map_err(|e| format_parse_error(source, e.line, e.column, &e.expected))?;
 
     let extractor = Extractor::new();
     let (items, diagnostics) = extractor.extract(&unit);
