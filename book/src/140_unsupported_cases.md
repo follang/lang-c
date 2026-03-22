@@ -14,6 +14,10 @@ should fit into one of these buckets:
 - diagnostics-only improvement
 - intentional rejection
 
+For the Level 1 production claim, this ledger is part of the real contract.
+If a family is not classified here, it should not be treated as in-scope
+production behavior.
+
 ## Frontend-Family Closure Ledger
 
 The current important families are:
@@ -32,6 +36,13 @@ This ledger is intentionally blunt:
 - if a family is not yet honestly representable, reject it
 - if a family is only partially representable, say so
 - if a family is only proven on named corpora, document that exact scope
+
+The Level 1 production envelope is Linux/ELF-first and corpus-backed. That
+means "supported" here should be read as one of:
+
+- fully supported within the named canonical corpus
+- partially supported with explicit diagnostics
+- rejected explicitly as out of scope
 
 ## Semantic analysis
 

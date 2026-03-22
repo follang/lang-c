@@ -13,6 +13,9 @@ PARC should currently be read as:
 - intentionally conservative when a large header family cannot be modeled
   honestly
 
+For Level 1 production, PARC should be read as Linux/ELF-first and
+canonical-corpus-backed, not as a universal frontend for arbitrary C headers.
+
 For whole-pipeline claims, this score is also capped by downstream `gerc`
 anchors that ingest translated PARC source surfaces in tests/examples.
 
@@ -37,6 +40,8 @@ The release posture should be judged against these anchors first:
 - vendored musl `stdint`
 - vendored zlib
 - vendored libpng scan
+- repo-owned `macro_env_a`
+- repo-owned `type_env_b`
 - OpenSSL public wrapper extraction
 - combined Linux event-loop wrapper extraction
 

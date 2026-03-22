@@ -6,6 +6,33 @@ PARC is the source frontend of the toolchain. It owns preprocessing, parsing,
 header scanning, source extraction, source diagnostics, and the PARC-owned
 source IR.
 
+## Scoped Production Statement
+
+The current Level 1 production claim for the whole pipeline is:
+
+- Linux/ELF-first
+- canonical-corpus-backed
+- conservative on unsupported source families
+
+For PARC specifically, that means:
+
+- production-ready as the source frontend for the documented canonical corpus
+- not a claim of universal C frontend parity
+- not a claim that every hostile extension family is fully supported
+
+## Level 1 Support Matrix
+
+| Area | Level 1 status | Notes |
+|---|---|---|
+| Linux/ELF-oriented public headers | primary production scope | This is the first production envelope. |
+| Apple-oriented public headers | secondary confidence scope | Useful and tested, but not the primary production claim. |
+| Windows-oriented public headers | secondary confidence scope | Not the first production envelope. |
+| K&R declarations | diagnostics-only | Explicit unsupported diagnostics are part of the contract. |
+| block pointers | rejected | Explicit rejection is part of the contract. |
+| bitfield-heavy records | partial | Source shape is preserved, full layout truth is not promised. |
+| vendor attributes | partial | Declarations are preserved with partial diagnostics where ignored. |
+| macro-heavy hostile stacks | corpus-backed support | Supported on the named canonical corpora, not claimed universally. |
+
 The current crate surface is broader than “just a parser”:
 
 - `driver` parses files through an external preprocessor
@@ -108,6 +135,17 @@ The current suite covers:
 
 The tests are the best statement of what PARC actually supports.
 
+## Level 1 Contract
+
+For the Level 1 production claim, the PARC contract is:
+
+- supported families are supported on the named canonical corpus
+- partial families emit explicit partial diagnostics
+- diagnostics-only families preserve useful source surface where possible
+- rejected families fail explicitly rather than degrading silently
+
+This is a bounded frontend contract, not a universal C compatibility claim.
+
 ## Hardening Matrix
 
 The current hardening ladder is easiest to read in four buckets:
@@ -157,6 +195,20 @@ system header family is equally mature.
 - for whole-pipeline production claims, confirm the current downstream `gerc`
   canonical anchors still ingest `parc`-driven source surfaces in
   tests/examples
+
+The Level 1 production floor is the hermetic subset of those gates:
+
+- vendored musl `stdint`
+- vendored zlib scan
+- vendored libpng scan
+- repo-owned `macro_env_a` hostile macro corpus
+- repo-owned `type_env_b` hostile type corpus
+
+The host-dependent confidence-raise layer is:
+
+- OpenSSL public wrapper extraction
+- libcurl public wrapper extraction
+- combined Linux event-loop wrapper extraction
 
 The current canonical frontend surfaces are:
 
