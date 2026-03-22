@@ -7,7 +7,7 @@ optionally accept GNU and Clang extensions.
 PARC produces a durable `SourcePackage` contract suitable for downstream
 consumption by linker and codegen stages.
 
-## What PARC gives you
+## What PARC Owns
 
 - **Preprocessing**: built-in C preprocessor with macro expansion, conditionals, and includes
 - **Parsing**: C11 parser producing a typed AST under `parc::ast`
@@ -19,7 +19,14 @@ consumption by linker and codegen stages.
 - Recursive visitor API under `parc::visit`
 - Tree-style debug printer under `parc::print`
 
-## Pipeline
+## What PARC Does Not Own
+
+- native symbol inspection
+- binary validation
+- link-plan construction
+- Rust lowering or emission
+
+## Data flow
 
 ```text
 C source / headers
@@ -30,7 +37,7 @@ C source / headers
   -> downstream (LINC, GERC)
 ```
 
-## Public modules
+## Module layout
 
 | Module | Purpose |
 | --- | --- |
@@ -46,6 +53,16 @@ C source / headers
 | `span` | Byte offsets for parsed nodes |
 | `loc` | Mapping byte offsets back to source files and lines |
 | `print` | Debug-oriented tree printer for ASTs |
+
+## Artifact boundary
+
+`parc` owns source meaning only.
+
+The `SourcePackage` boundary is where `parc` stops:
+
+- `parc/src/**` must not depend on `linc` or `gec`
+- downstream translation belongs only in tests, examples, or external harnesses
+- `parc` does not own link or generation concerns
 
 ## Typical use cases
 
