@@ -235,3 +235,36 @@ fn linux_event_loop_wrapper_extracts_combined_surface_when_headers_exist() {
     fs::remove_file(&wrapper).expect("removing temporary wrapper");
     fs::remove_dir(&dir).expect("removing temporary wrapper directory");
 }
+
+#[test]
+fn linux_event_loop_wrapper_extracts_deterministically_when_headers_exist() {
+    let epoll_candidates = ["/usr/include/sys/epoll.h", "/usr/include/x86_64-linux-gnu/sys/epoll.h"];
+    let timerfd_candidates = ["/usr/include/sys/timerfd.h", "/usr/include/x86_64-linux-gnu/sys/timerfd.h"];
+    let signalfd_candidates = ["/usr/include/sys/signalfd.h", "/usr/include/x86_64-linux-gnu/sys/signalfd.h"];
+    if find_header(&epoll_candidates).is_none()
+        || find_header(&timerfd_candidates).is_none()
+        || find_header(&signalfd_candidates).is_none()
+    {
+        return;
+    }
+
+    let make = || {
+        let dir = unique_temp_dir();
+        fs::create_dir_all(&dir).expect("creating temporary wrapper directory");
+        let wrapper = dir.join("wrapper.c");
+        fs::write(
+            &wrapper,
+            "#include <sys/epoll.h>\n#include <sys/timerfd.h>\n#include <sys/signalfd.h>\n",
+        )
+        .expect("writing temporary wrapper");
+
+        let pkg = parse_wrapper_package(&wrapper).expect("combined linux wrapper should parse");
+        let json = serde_json::to_string(&pkg).expect("combined event-loop package json");
+
+        fs::remove_file(&wrapper).expect("removing temporary wrapper");
+        fs::remove_dir(&dir).expect("removing temporary wrapper directory");
+        json
+    };
+
+    assert_eq!(make(), make());
+}
