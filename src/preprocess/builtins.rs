@@ -17,6 +17,7 @@ pub fn builtin_headers() -> HashMap<String, String> {
     headers.insert("stdint.h".into(), STDINT_H.into());
     headers.insert("stddef.h".into(), STDDEF_H.into());
     headers.insert("stdbool.h".into(), STDBOOL_H.into());
+    headers.insert("limits.h".into(), LIMITS_H.into());
     headers
 }
 
@@ -123,3 +124,51 @@ const STDBOOL_H: &str = r#"
 
 #endif /* _PAC_STDBOOL_H */
 "#;
+
+const LIMITS_H: &str = r#"
+#ifndef _PAC_LIMITS_H
+#define _PAC_LIMITS_H 1
+
+#define CHAR_BIT __CHAR_BIT__
+
+#define SCHAR_MAX 127
+#define SCHAR_MIN (-128)
+#define UCHAR_MAX 255
+
+#define SHRT_MAX 32767
+#define SHRT_MIN (-32768)
+#define USHRT_MAX 65535
+
+#define INT_MAX __INT_MAX__
+#define INT_MIN (-__INT_MAX__ - 1)
+#define UINT_MAX 4294967295U
+
+#define LONG_MAX __LONG_MAX__
+#define LONG_MIN (-__LONG_MAX__ - 1L)
+#if __SIZEOF_LONG__ == 8
+#  define ULONG_MAX 18446744073709551615UL
+#else
+#  define ULONG_MAX 4294967295UL
+#endif
+
+#define LLONG_MAX __LONG_LONG_MAX__
+#define LLONG_MIN (-__LONG_LONG_MAX__ - 1LL)
+#define ULLONG_MAX 18446744073709551615ULL
+
+#endif /* _PAC_LIMITS_H */
+"#;
+
+#[cfg(test)]
+mod tests {
+    use super::builtin_headers;
+
+    #[test]
+    fn builtin_headers_include_limits() {
+        let headers = builtin_headers();
+        assert!(headers.contains_key("limits.h"));
+        let limits = headers.get("limits.h").unwrap();
+        assert!(limits.contains("CHAR_BIT"));
+        assert!(limits.contains("INT_MAX"));
+        assert!(limits.contains("ULONG_MAX"));
+    }
+}

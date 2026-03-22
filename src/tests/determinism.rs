@@ -86,14 +86,14 @@ fn determinism_vendored_libpng_scan() {
     let entry = root.join("main.c");
 
     let make = || {
-        let err = scan_headers(
+        let result = scan_headers(
             &ScanConfig::new()
                 .entry_header(&entry)
                 .include_dir(&include_dir)
                 .with_builtin_preprocessor(),
         )
-        .expect_err("vendored libpng scan should currently fail conservatively");
-        format!("{err:?}")
+        .expect("vendored libpng scan should now succeed with builtin limits");
+        serde_json::to_string(&result.package).unwrap()
     };
 
     assert_eq!(make(), make());
