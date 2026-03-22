@@ -239,6 +239,32 @@ fn scan_vendored_zlib_headers_fail_conservatively() {
     assert!(result.preprocessed_source.contains("z_stream"));
 }
 
+#[test]
+fn scan_vendored_musl_stdint_headers() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("test/full_apps/external/musl/stdint");
+    let include_dir = root.join("include");
+    let entry = include_dir.join("stdint.h");
+
+    let result = scan_headers(
+        &ScanConfig::new()
+            .entry_header(&entry)
+            .include_dir(&include_dir)
+            .with_builtin_preprocessor(),
+    )
+    .expect("vendored musl stdint scan should succeed");
+    let pkg = &result.package;
+
+    assert!(!pkg.has_diagnostics());
+    assert!(pkg.type_alias_count() >= 20);
+    assert!(pkg.find_type_alias("int32_t").is_some());
+    assert!(pkg.find_type_alias("uint64_t").is_some());
+    assert!(pkg.find_type_alias("uintptr_t").is_some());
+    assert!(pkg.record_count() >= 1);
+    assert!(result.preprocessed_source.contains("int32_t"));
+    assert!(result.preprocessed_source.contains("uint64_t"));
+}
+
 // --- Defines controlling ifdef ---
 
 #[test]
