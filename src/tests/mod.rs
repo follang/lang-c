@@ -5,6 +5,7 @@ mod differential;
 mod external_tools;
 mod extraction_fixtures;
 mod failure_matrix_preprocess;
+mod failure_matrix_source;
 mod full_apps;
 mod hostile_headers;
 mod parse_api;
