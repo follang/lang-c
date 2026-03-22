@@ -13,6 +13,13 @@ PARC has two broad testing layers:
 - direct parser/API tests in `src/tests`
 - corpus-style fixtures under `test/reftests/` and, when present, `test/full_apps/`
 
+It also now has explicit grouped failure suites:
+
+- `failure_matrix_preprocess` for scan/preprocessor hard failures and
+  conservative scan outcomes
+- `failure_matrix_source` for source-parse hard failures, resilient recovery,
+  and diagnostic-preserving extraction
+
 ## Basic commands
 
 The repository `Makefile` wraps the normal Cargo flow:

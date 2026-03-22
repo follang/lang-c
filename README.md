@@ -103,6 +103,7 @@ The current suite covers:
 - scan/extract/source-contract behavior
 - determinism and JSON/source-artifact roundtrips
 - hostile headers, system headers, and full-app fixtures
+- explicit preprocess and source failure matrices
 - external-fixture corpora under `src/tests/**`
 
 The tests are the best statement of what PARC actually supports.
@@ -121,6 +122,8 @@ The current hardening ladder is easiest to read in four buckets:
 - hostile and degraded surfaces
   - hostile declaration fixtures
   - resilient recovery fixtures
+  - explicit preprocess failure matrix
+  - explicit source refusal and recovery matrix
   - conservative failure on libpng builtin-preprocessor width checks
 - determinism anchors
   - vendored musl scan
