@@ -139,6 +139,26 @@ fn determinism_type_hostile_corpus_scan() {
     assert_eq!(make(), make());
 }
 
+#[test]
+fn determinism_combo_hostile_corpus_scan() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("test/corpus/combo_env_c");
+    let include_dir = root.join("include");
+    let entry = root.join("entry.h");
+
+    let make = || {
+        let result = scan_headers(
+            &ScanConfig::new()
+                .entry_header(&entry)
+                .include_dir(&include_dir)
+                .with_builtin_preprocessor(),
+        )
+        .expect("combo hostile corpus scan should succeed");
+        serde_json::to_string(&result.package).expect("package json")
+    };
+
+    assert_eq!(make(), make());
+}
+
 // --- JSON transport ---
 
 #[test]

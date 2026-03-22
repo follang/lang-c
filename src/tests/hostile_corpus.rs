@@ -54,3 +54,28 @@ fn hostile_type_env_corpus_scans_with_builtin_preprocessor() {
     assert!(result.preprocessed_source.contains("item_iter_cb"));
     assert!(result.preprocessed_source.contains("item_bucket"));
 }
+
+#[test]
+fn hostile_combo_env_corpus_scans_with_builtin_preprocessor() {
+    let root = corpus_root("combo_env_c");
+    let include_dir = root.join("include");
+    let entry = root.join("entry.h");
+
+    let result = scan_headers(
+        &ScanConfig::new()
+            .entry_header(&entry)
+            .include_dir(&include_dir)
+            .with_builtin_preprocessor()
+            .with_resolve_typedefs(),
+    )
+    .expect("combined hostile corpus should scan");
+
+    let pkg = &result.package;
+    assert!(pkg.find_type_alias("combo_word_t").is_some());
+    assert!(pkg.find_record("combo_config").is_some());
+    assert!(pkg.find_enum("combo_mode").is_some());
+    assert!(pkg.find_function("combo_open").is_some());
+    assert!(pkg.find_function("combo_log").is_some());
+    assert!(result.preprocessed_source.contains("combo_word_t"));
+    assert!(result.preprocessed_source.contains("combo_log"));
+}
