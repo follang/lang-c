@@ -9,6 +9,7 @@ mod failure_matrix_preprocess;
 mod failure_matrix_source;
 mod full_apps;
 mod hostile_headers;
+mod hostile_corpus;
 mod parse_api;
 mod recovery;
 mod reftests;
